@@ -3,12 +3,15 @@ extends CharacterBody2D
 @export var shoot_interval := 2.0
 @export var projectile_speed := 150.0
 @export var projectile_scene : PackedScene = preload("res://scenes/arrow.tscn")
+@onready var healthbar = $healthbar
 
 var shoot_timer := 0.0
 var player : Node2D
 
 func _ready():
 	player = get_tree().get_first_node_in_group("player") # ให้ Player อยู่ใน group "player"
+	
+	
 
 func _process(delta):
 	if player == null:

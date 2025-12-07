@@ -1,7 +1,8 @@
-[gd_scene load_steps=11 format=3 uid="uid://cgd0ksnrtlb2y"]
+[gd_scene load_steps=12 format=3 uid="uid://cgd0ksnrtlb2y"]
 
 [ext_resource type="Script" uid="uid://6ahp1bbvieiq" path="res://script/enemy.gd" id="1_4jekx"]
 [ext_resource type="Texture2D" uid="uid://b3823flnlpndc" path="res://assets/cr_enemy/IDLE.png" id="1_yww8s"]
+[ext_resource type="PackedScene" uid="uid://m2qisqs2fsqr" path="res://scenes/healthbar.tscn" id="3_4ra3w"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4jekx"]
 atlas = ExtResource("1_yww8s")
@@ -72,3 +73,9 @@ sprite_frames = SubResource("SpriteFrames_0qcj2")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
 position = Vector2(-1, -28)
 shape = SubResource("CapsuleShape2D_5op34")
+
+[node name="healthbar" parent="CharacterBody2D" instance=ExtResource("3_4ra3w")]
+offset_left = -114.333336
+offset_top = -78.333336
+offset_right = 114.666664
+offset_bottom = -66.833336
