@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3 uid="uid://coaay5kn2p5gl"]
+
+[ext_resource type="Script" uid="uid://guyx0dqdvujs" path="res://script/energy.gd" id="1_ldayl"]
+[ext_resource type="Texture2D" uid="uid://4q335xxs2p" path="res://icon.svg" id="1_m56ky"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ldayl"]
+size = Vector2(128.5, 139.4)
+
+[node name="energy" type="Node2D"]
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 4
+script = ExtResource("1_ldayl")
+
+[node name="Sprite2D" type="Sprite2D" parent="Area2D"]
+position = Vector2(2, -10)
+scale = Vector2(1, 0.078125)
+texture = ExtResource("1_m56ky")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(2.25, -10)
+scale = Vector2(1, 0.078125)
+shape = SubResource("RectangleShape2D_ldayl")

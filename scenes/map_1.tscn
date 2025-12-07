@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3 uid="uid://dqyxqr7i3sdc5"]
+
+[ext_resource type="PackedScene" uid="uid://dmlxdue07l5hy" path="res://scenes/player.tscn" id="1_ibhou"]
+[ext_resource type="Script" uid="uid://28mq4v83qf6k" path="res://scenes/map_1.gd" id="1_lj2ar"]
+[ext_resource type="PackedScene" uid="uid://cgd0ksnrtlb2y" path="res://scenes/enemy.tscn" id="2_3okoh"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_ibqsa"]
+
+[node name="map_1" type="Node2D"]
+script = ExtResource("1_lj2ar")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(574, 326)
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+position = Vector2(550, 519)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+shape = SubResource("WorldBoundaryShape2D_ibqsa")
+
+[node name="player" parent="." instance=ExtResource("1_ibhou")]
+position = Vector2(811, 426)
+
+[node name="enemy" parent="." instance=ExtResource("2_3okoh")]
+position = Vector2(572, 204)
