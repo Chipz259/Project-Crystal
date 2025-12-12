@@ -2,6 +2,7 @@ extends CharacterBody2D
 
 @export var perfect_block_window := 0.2  # เวลาบล็อกพอดีตอนกระสุนชน
 @export var energy_projectile_scene : PackedScene = preload("res://scenes/energy.tscn")
+@onready var animated_sprite := $AnimatedSprite2D # แก้ path ให้ตรงกับของโปเต้
 
 var energy := 0
 var blocking := false
@@ -10,23 +11,71 @@ var block_timer := 0.0
 const SPEED = 300.0
 const JUMP_VELOCITY = -400.0
 
+enum {
+	STATE_IDLE,
+	STATE_RUN,
+	STATE_JUMP,
+	STATE_FALL,
+	STATE_ATTACK,
+	STATE_BLOCK
+}
 
-func _physics_process(delta: float) -> void:
-	# Add the gravity.
+var state = STATE_IDLE
+var previous_state = null
+
+func _physics_process(delta): #FSM
+	handle_movement(delta)
+	update_state()
+	play_animation()
+	move_and_slide()
+
+func handle_movement(delta):
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
-	# Handle jump.
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 
-	# Get the input direction and handle the movement/deceleration.
-	# As good practice, you should replace UI actions with custom gameplay actions.
-	var direction := Input.get_axis("ui_left", "ui_right")
-	if direction:
+	var direction = Input.get_axis("ui_left", "ui_right")
+
+	if direction != 0:
 		velocity.x = direction * SPEED
+		animated_sprite.flip_h = direction < 0
 	else:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
+		
+func update_state(): #FSM
+	# Jumping
+	if not is_on_floor():
+		if velocity.y < 0:
+			state = STATE_JUMP
+		else:
+			state = STATE_FALL
+		return
+	# On floor
+
+	if abs(velocity.x) > 10:
+		state = STATE_RUN
+	else:
+		state = STATE_IDLE
+			
+
+
+func play_animation(): #FSM_animation
+	if state == previous_state:
+		return #ไม่ให้ Animation looping
+
+	match state:
+		STATE_IDLE:
+			animated_sprite.play("idle")
+		STATE_RUN:
+			animated_sprite.play("run")
+		STATE_JUMP:
+			animated_sprite.play("jump")
+		STATE_FALL:
+			animated_sprite.play("fall")
+			
+	previous_state = state
 
 	move_and_slide()
 
@@ -86,13 +135,12 @@ func shoot_energy():
 	get_parent().add_child(e)
 
 func flash_damage():
-	var sprite := $AnimatedSprite2D  # แก้ path ให้ตรงกับของโปเต้
 	var tween := create_tween()
 
-	sprite.modulate = Color(1, 1, 1, 1)  # reset
+	animated_sprite.modulate = Color(1, 1, 1, 1)  # reset
 
 	# กระพริบขาว → กลับเป็นปกติ 2 ครั้ง
-	tween.tween_property(sprite, "modulate", Color(1, 0.3, 0.3, 1), 0.1).as_relative()
-	tween.tween_property(sprite, "modulate", Color(1, 1, 1, 1), 0.1)
-	tween.tween_property(sprite, "modulate", Color(1, 0.3, 0.3, 1), 0.1)
-	tween.tween_property(sprite, "modulate", Color(1, 1, 1, 1), 0.1)
+	tween.tween_property(animated_sprite, "modulate", Color(1, 0.3, 0.3, 1), 0.1).as_relative()
+	tween.tween_property(animated_sprite, "modulate", Color(1, 1, 1, 1), 0.1)
+	tween.tween_property(animated_sprite, "modulate", Color(1, 0.3, 0.3, 1), 0.1)
+	tween.tween_property(animated_sprite, "modulate", Color(1, 1, 1, 1), 0.1)
