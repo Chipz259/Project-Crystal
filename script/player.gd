@@ -14,6 +14,20 @@ var block_cd_timer := 0.0
 @export var parry_shake_amount := 10.0
 @export var parry_shake_duration := 0.12
 
+enum AnimState {
+	IDLE,
+	RUN,
+	JUMP,
+	FALL,
+	BLOCK,
+	SHOOT,
+	HIT,
+	DEAD
+}
+
+var anim_state : AnimState = AnimState.IDLE
+@onready var anim := $AnimatedSprite2D
+
 var max_hp := 5
 var hp := max_hp
 
@@ -48,6 +62,54 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 
 	move_and_slide()
+
+func update_anim_fsm() -> void:
+	var new_state := anim_state
+
+	# ---- Highest priority (override everything visually) ----
+	if hp <= 0:
+		new_state = AnimState.DEAD
+	elif blocking:
+		new_state = AnimState.BLOCK   # works mid-air
+	elif not is_on_floor():
+		if velocity.y < 0:
+			new_state = AnimState.JUMP
+		else:
+			new_state = AnimState.FALL
+	else:
+		if abs(velocity.x) > 5:
+			new_state = AnimState.RUN
+		else:
+			new_state = AnimState.IDLE
+
+	# ---- Apply animation only when state changes ----
+	if new_state != anim_state:
+		anim_state = new_state
+		play_anim_for_state(anim_state)
+		
+	if velocity.x != 0:
+		anim.flip_h = velocity.x < 0
+
+func play_anim_for_state(state: AnimState) -> void:
+	match state:
+		AnimState.IDLE:
+			print("idle")
+			anim.play("idle")
+		AnimState.RUN:
+			print("run")
+			anim.play("run")
+		AnimState.JUMP:
+			anim.play("jump")
+		AnimState.FALL:
+			anim.play("fall")
+		AnimState.BLOCK:
+			anim.play("block")
+		AnimState.SHOOT:
+			anim.play("shoot")
+		AnimState.HIT:
+			anim.play("hit")
+		AnimState.DEAD:
+			anim.play("dead")
 
 
 func _ready():
@@ -85,6 +147,9 @@ func _process(delta):
 		print("SHOOT ENERGY, stack =", energy)
 		shoot_energy()
 		energy = 0
+		
+	update_anim_fsm()
+
 
 
 func on_projectile_hit(projectile):
