@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://d1ceqx38duixo"]
+[gd_scene load_steps=12 format=3 uid="uid://d1ceqx38duixo"]
 
 [ext_resource type="Texture2D" uid="uid://o1cii2hjm3nm" path="res://assets/origbig.png" id="1_glvj0"]
 [ext_resource type="Script" uid="uid://2oytefrwwtqt" path="res://script/UpgradeShrine.gd" id="1_h51b1"]
@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://dmlxdue07l5hy" path="res://scenes/player.tscn" id="2_vkrrq"]
 [ext_resource type="PackedScene" uid="uid://cpykr0eqqx0dx" path="res://scenes/UpgradePanel.tscn" id="5_rpjn8"]
 [ext_resource type="PackedScene" uid="uid://pdo4xujgur46" path="res://scenes/player_health_bar.tscn" id="6_slfnn"]
-[ext_resource type="PackedScene" uid="uid://cgd0ksnrtlb2y" path="res://scenes/enemy.tscn" id="7_yc1ka"]
+[ext_resource type="Script" uid="uid://d25yalo6qwj8o" path="res://script/ExitZone.gd" id="7_slfnn"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_t2xha"]
 blend_mode = 2
@@ -16,9 +16,16 @@ size = Vector2(163, 141)
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_33fdb"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yc1ka"]
+size = Vector2(62, 242)
+
 [node name="UpgradeShrine" type="Area2D"]
 script = ExtResource("1_h51b1")
 upgrade_panel_path = NodePath("UpgradePanel")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(574, 330)
+zoom = Vector2(1.75, 1.75)
 
 [node name="UpgradePanel" parent="." instance=ExtResource("5_rpjn8")]
 
@@ -47,5 +54,18 @@ position = Vector2(177, 456)
 
 [node name="player_health_bar" parent="." instance=ExtResource("6_slfnn")]
 
-[node name="enemy" parent="." instance=ExtResource("7_yc1ka")]
-position = Vector2(1024, 547)
+[node name="ExitZone" type="Area2D" parent="."]
+script = ExtResource("7_slfnn")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ExitZone"]
+position = Vector2(1102, 508)
+shape = SubResource("RectangleShape2D_yc1ka")
+
+[node name="Prompt" type="Label" parent="ExitZone"]
+offset_left = 840.0
+offset_top = 454.0
+offset_right = 1075.0
+offset_bottom = 477.0
+text = "[E] to continue deeper"
+horizontal_alignment = 1
+autowrap_mode = 2

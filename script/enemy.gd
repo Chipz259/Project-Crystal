@@ -16,6 +16,10 @@ var core_reward: int = 1
 var shoot_timer := 0.0
 var player : Node2D
 
+@export var is_boss := true
+@export var next_scene_after_boss := "res://scenes/UpgradeShrine.tscn" # hub ของนาย
+@export_multiline var boss_story_text := "คริสตัลแตกร้าว...\nความทรงจำบางส่วนไหลกลับมา"
+
 func _ready():
 	add_to_group("enemy")
 	hp = max_hp
@@ -49,12 +53,10 @@ func take_damage(amount: int) -> void:
 func die() -> void:
 	GameState.add_shards(shard_reward)
 	GameState.add_cores(core_reward)
-	
-	if shard_popup_scene:
-		var popup = shard_popup_scene.instantiate()
-		get_tree().current_scene.add_child(popup)
-		popup.global_position = global_position + Vector2(0, -16)
-	print("Run shards =", GameState.run_shards, " cores =", GameState.cores)
+	if is_boss:
+		Transition.boss_clear_to_scene(next_scene_after_boss, boss_story_text)
+		queue_free()
+		return
 	queue_free()
 
 func shoot_projectile():

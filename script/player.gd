@@ -7,7 +7,7 @@ var block_cd_timer := 0.0
 @export var energy_damage_by_stack := [1, 3, 6] 
 # มี 1 energy = 1 dmg, มี 2 = 3 dmg, มี 3 = 6 dmg (ปรับเลขได้ตามใจ)
 
-@export var perfect_block_window := 0.12  # เวลาบล็อกพอดีตอนกระสุนชน
+@export var perfect_block_window := 0.20  # เวลาบล็อกพอดีตอนกระสุนชน
 @export var energy_projectile_scene : PackedScene = preload("res://scenes/energy.tscn")
 
 @export var parry_hitstop := 0.06

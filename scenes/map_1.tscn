@@ -1,10 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://dqyxqr7i3sdc5"]
+[gd_scene load_steps=7 format=3 uid="uid://dqyxqr7i3sdc5"]
 
 [ext_resource type="PackedScene" uid="uid://dmlxdue07l5hy" path="res://scenes/player.tscn" id="1_ibhou"]
 [ext_resource type="Script" uid="uid://28mq4v83qf6k" path="res://script/map_1.gd" id="1_lj2ar"]
 [ext_resource type="Texture2D" uid="uid://o1cii2hjm3nm" path="res://assets/origbig.png" id="2_0dnla"]
 [ext_resource type="PackedScene" uid="uid://cgd0ksnrtlb2y" path="res://scenes/enemy.tscn" id="2_3okoh"]
-[ext_resource type="Texture2D" uid="uid://4q335xxs2p" path="res://icon.svg" id="3_k075t"]
 [ext_resource type="PackedScene" uid="uid://pdo4xujgur46" path="res://scenes/player_health_bar.tscn" id="4_00lji"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_ibqsa"]
@@ -17,12 +16,9 @@ position = Vector2(580.22217, 324.5)
 scale = Vector2(0.50848764, 0.50848764)
 texture = ExtResource("2_0dnla")
 
-[node name="Icon" type="Sprite2D" parent="."]
-position = Vector2(998, 331)
-texture = ExtResource("3_k075t")
-
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(574, 326)
+position = Vector2(574, 330)
+zoom = Vector2(1.75, 1.75)
 
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
 position = Vector2(550, 519)
@@ -35,9 +31,6 @@ shape = SubResource("WorldBoundaryShape2D_ibqsa")
 position = Vector2(124, 480)
 
 [node name="enemy" parent="." instance=ExtResource("2_3okoh")]
-position = Vector2(1006, 274)
-
-[node name="enemy2" parent="." instance=ExtResource("2_3okoh")]
-position = Vector2(495, 275)
+position = Vector2(919, 517)
 
 [node name="player_health_bar" parent="." instance=ExtResource("4_00lji")]
