@@ -37,4 +37,7 @@ position = Vector2(124, 480)
 [node name="enemy" parent="." instance=ExtResource("2_3okoh")]
 position = Vector2(1006, 274)
 
+[node name="enemy2" parent="." instance=ExtResource("2_3okoh")]
+position = Vector2(495, 275)
+
 [node name="player_health_bar" parent="." instance=ExtResource("4_00lji")]

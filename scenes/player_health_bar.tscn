@@ -1,10 +1,11 @@
-[gd_scene load_steps=11 format=3 uid="uid://pdo4xujgur46"]
+[gd_scene load_steps=12 format=3 uid="uid://pdo4xujgur46"]
 
 [ext_resource type="Texture2D" uid="uid://cpg2ofrymx7v4" path="res://assets/hp_bar_empty.tres" id="1_oil0j"]
 [ext_resource type="Script" uid="uid://cu8vm8lg2gx35" path="res://script/player_health_bar.gd" id="1_ujpt8"]
 [ext_resource type="Script" uid="uid://d0nm1wi2012in" path="res://script/healthbar.gd" id="2_ujpt8"]
 [ext_resource type="Texture2D" uid="uid://cm0g7he5xgbpr" path="res://assets/energy_fill.tres" id="3_orymg"]
 [ext_resource type="Texture2D" uid="uid://bhhcnsund4pfp" path="res://assets/energy_empty.tres" id="4_temqn"]
+[ext_resource type="Texture2D" uid="uid://4q335xxs2p" path="res://icon.svg" id="6_576rc"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ujpt8"]
 
@@ -104,6 +105,30 @@ offset_left = -13.0
 offset_top = -12.0
 offset_right = 1169.0
 offset_bottom = 656.0
-color = Color(0.5411765, 0.09803922, 0.09803922, 0.3137255)
+color = Color(0.5411765, 0.09803922, 0.09803922, 0.7058824)
+
+[node name="ShardLabel" type="Label" parent="."]
+offset_left = 162.0
+offset_top = 171.0
+offset_right = 202.0
+offset_bottom = 194.0
+text = "0"
+
+[node name="Sprite2D" type="Sprite2D" parent="ShardLabel"]
+position = Vector2(-30, 11)
+scale = Vector2(0.34375, 0.34375)
+texture = ExtResource("6_576rc")
+
+[node name="CoreLabel" type="Label" parent="."]
+offset_left = 261.0
+offset_top = 172.0
+offset_right = 301.0
+offset_bottom = 195.0
+text = "0"
+
+[node name="Sprite2D2" type="Sprite2D" parent="CoreLabel"]
+position = Vector2(-27, 10)
+scale = Vector2(0.34375, 0.34375)
+texture = ExtResource("6_576rc")
 
 [connection signal="timeout" from="healthbar_player/Timer_player" to="." method="_on_timer_player_timeout"]

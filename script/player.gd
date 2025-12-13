@@ -1,10 +1,13 @@
 extends CharacterBody2D
 const MAX_ENERGY := 3
 
+@export var block_cooldown := 0.6   # คูลดาวน์หลังบล็อก (ปรับได้)
+var block_cd_timer := 0.0
+
 @export var energy_damage_by_stack := [1, 3, 6] 
 # มี 1 energy = 1 dmg, มี 2 = 3 dmg, มี 3 = 6 dmg (ปรับเลขได้ตามใจ)
 
-@export var perfect_block_window := 0.2  # เวลาบล็อกพอดีตอนกระสุนชน
+@export var perfect_block_window := 0.12  # เวลาบล็อกพอดีตอนกระสุนชน
 @export var energy_projectile_scene : PackedScene = preload("res://scenes/energy.tscn")
 
 @export var parry_hitstop := 0.06
@@ -24,19 +27,20 @@ var _hitstop_lock := false
 const SPEED = 300.0
 const JUMP_VELOCITY = -400.0
 
-
-
 func _physics_process(delta: float) -> void:
-	# Add the gravity.
+	# ✅ Freeze ระหว่าง block window
+	if blocking:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		return
+
+	# ----- ของเดิม -----
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
-	# Handle jump.
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 
-	# Get the input direction and handle the movement/deceleration.
-	# As good practice, you should replace UI actions with custom gameplay actions.
 	var direction := Input.get_axis("ui_left", "ui_right")
 	if direction:
 		velocity.x = direction * SPEED
@@ -45,6 +49,7 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
+
 func _ready():
 	add_to_group("player")
 	hp = max_hp
@@ -52,22 +57,30 @@ func _ready():
 	print("Player added to group 'player'", self)
 
 func _process(delta):
-	# ---------------------------
-	# ระบบบล็อกแบบกดขณะ projectile ถึงตัว
-	# ---------------------------
+	# --- ลด cooldown ---
+	if block_cd_timer > 0.0:
+		block_cd_timer -= delta
+
+	# --- ลด block window ---
 	if blocking:
 		block_timer -= delta
-	if block_timer <= 0:
-		blocking = false
+		if block_timer <= 0.0:
+			blocking = false
+			block_cd_timer = block_cooldown
+			print("BLOCK window ended -> cooldown started:", snapped(block_cd_timer, 0.01))
 
+	# --- กด block ---
 	if Input.is_action_just_pressed("block"):
-		print("BLOCK pressed")
-		blocking = true
-		block_timer = perfect_block_window
+		if blocking:
+			print("BLOCK already active")
+		elif block_cd_timer > 0.0:
+			print("BLOCK on cooldown:", snapped(block_cd_timer, 0.01))
+		else:
+			print("BLOCK pressed")
+			blocking = true
+			block_timer = perfect_block_window + GameState.parry_window_bonus
 
-	# ---------------------------
-	# ยิง energy ออกตามเมาส์
-	# ---------------------------
+	# --- ยิง energy ตามเดิม ---
 	if Input.is_action_just_pressed("shoot_energy") and energy > 0:
 		print("SHOOT ENERGY, stack =", energy)
 		shoot_energy()
@@ -128,7 +141,13 @@ func take_damage(amount: int) -> void:
 
 func die() -> void:
 	print("Player died")
-	respawn() # สตับไว้ก่อน เดี๋ยวค่อยผูกกับ Core/Checkpoint
+
+	if GameState.cores > 0:
+		GameState.cores -= 1
+		GameState.cores_changed.emit(GameState.cores) # 👈 ใส่ตรงนี้
+		respawn()
+	else:
+		get_tree().quit()
 
 func respawn() -> void:
 	hp = max_hp

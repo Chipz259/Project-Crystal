@@ -1,6 +1,8 @@
 extends CanvasLayer
 
 @onready var hp_bar = $healthbar_player
+@onready var shard_label: Label = $ShardLabel
+@onready var core_label: Label = $CoreLabel
 
 @onready var e1: TextureRect = $EnergyUI/Energy1
 @onready var e2: TextureRect = $EnergyUI/Energy2
@@ -27,7 +29,16 @@ func _ready() -> void:
 	print("low_hp_vignette =", low_hp_vignette)
 	player = get_tree().get_first_node_in_group("player")
 	_sync_max_hp()
+	shard_label.text = str(GameState.run_shards)
+	if not GameState.run_shards_changed.is_connected(_on_shards_changed):
+		GameState.run_shards_changed.connect(_on_shards_changed)
+	core_label.text = str(GameState.cores)
+	if not GameState.cores_changed.is_connected(_on_cores_changed):
+		GameState.cores_changed.connect(_on_cores_changed)
 	_update_all(true)
+
+func _on_shards_changed(value: int) -> void:
+	shard_label.text = str(value)
 
 func _process(_delta: float) -> void:
 	if player == null:
@@ -36,7 +47,6 @@ func _process(_delta: float) -> void:
 			_sync_max_hp()
 			_update_all(true)
 		return
-
 	_update_all(false)
 
 func _sync_max_hp() -> void:
@@ -148,3 +158,6 @@ func _update_energy_full_pulse(en_i: int) -> void:
 		ui.scale = Vector2(s, s)
 	else:
 		ui.scale = Vector2.ONE
+
+func _on_cores_changed(value: int) -> void:
+	core_label.text = str(value)

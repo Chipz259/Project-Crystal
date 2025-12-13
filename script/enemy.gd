@@ -1,7 +1,12 @@
 extends CharacterBody2D
 
+@export var shard_popup_scene: PackedScene = preload("res://scenes/ShardPopup.tscn")
+
 @export var max_hp := 5
 var hp := 0
+
+@export var shard_reward: int = 1
+var core_reward: int = 1
 
 @export var shoot_interval := 2.0
 @export var projectile_speed := 150.0
@@ -42,7 +47,14 @@ func take_damage(amount: int) -> void:
 		die()
 
 func die() -> void:
-	# (ขั้นต่ำสุด) ตายแล้วหายไป
+	GameState.add_shards(shard_reward)
+	GameState.add_cores(core_reward)
+	
+	if shard_popup_scene:
+		var popup = shard_popup_scene.instantiate()
+		get_tree().current_scene.add_child(popup)
+		popup.global_position = global_position + Vector2(0, -16)
+	print("Run shards =", GameState.run_shards, " cores =", GameState.cores)
 	queue_free()
 
 func shoot_projectile():
