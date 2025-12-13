@@ -1,0 +1,7 @@
+[gd_resource type="AtlasTexture" load_steps=2 format=3 uid="uid://bhhcnsund4pfp"]
+
+[ext_resource type="Texture2D" uid="uid://cpr7lbf3c3ex7" path="res://assets/Stone_UI_Sprite_Sheet.png" id="1_m0ppy"]
+
+[resource]
+atlas = ExtResource("1_m0ppy")
+region = Rect2(311, 70.82838, 18, 19.171623)

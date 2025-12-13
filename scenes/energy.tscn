@@ -6,19 +6,21 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ldayl"]
 size = Vector2(128.5, 139.4)
 
-[node name="energy" type="Node2D"]
-
-[node name="Area2D" type="Area2D" parent="."]
+[node name="Area2D" type="Area2D"]
 collision_layer = 8
-collision_mask = 4
+collision_mask = 12
 script = ExtResource("1_ldayl")
 
-[node name="Sprite2D" type="Sprite2D" parent="Area2D"]
+[node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(2, -10)
 scale = Vector2(1, 0.078125)
 texture = ExtResource("1_m56ky")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(2.25, -10)
 scale = Vector2(1, 0.078125)
 shape = SubResource("RectangleShape2D_ldayl")
+
+[node name="energy" type="Node2D" parent="."]
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

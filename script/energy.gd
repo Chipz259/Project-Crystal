@@ -3,13 +3,14 @@ extends Area2D
 @export var base_speed := 200.0
 
 var direction := Vector2.ZERO
-var power := 1  # พลังจะเพิ่มตาม energy ที่ผู้เล่นมีตอนยิง
+var damage := 1
+var stack := 1 # optional: เอาไว้ทำ VFX/ความเร็วตามสแต็ก
 
-func _process(delta):
-	position += direction * base_speed * power * delta
+func _physics_process(delta):
+	position += direction * base_speed * delta
 
 func _on_body_entered(body):
-	# กระสุนนี้จะชนศัตรู แกกำหนด damage เองได้
+	print("ENERGY HIT:", body.name)
 	if body.has_method("take_damage"):
-		body.take_damage(power)
+		body.take_damage(damage)
 	queue_free()

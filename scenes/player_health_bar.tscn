@@ -1,0 +1,109 @@
+[gd_scene load_steps=11 format=3 uid="uid://pdo4xujgur46"]
+
+[ext_resource type="Texture2D" uid="uid://cpg2ofrymx7v4" path="res://assets/hp_bar_empty.tres" id="1_oil0j"]
+[ext_resource type="Script" uid="uid://cu8vm8lg2gx35" path="res://script/player_health_bar.gd" id="1_ujpt8"]
+[ext_resource type="Script" uid="uid://d0nm1wi2012in" path="res://script/healthbar.gd" id="2_ujpt8"]
+[ext_resource type="Texture2D" uid="uid://cm0g7he5xgbpr" path="res://assets/energy_fill.tres" id="3_orymg"]
+[ext_resource type="Texture2D" uid="uid://bhhcnsund4pfp" path="res://assets/energy_empty.tres" id="4_temqn"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ujpt8"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oil0j"]
+bg_color = Color(0.8117647, 0.34117648, 0.23529412, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ujpt8"]
+bg_color = Color(0.03529412, 0.047058824, 0.078431375, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_temqn"]
+bg_color = Color(1, 1, 1, 1)
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_ujpt8"]
+
+[node name="player_health_bar" type="CanvasLayer"]
+script = ExtResource("1_ujpt8")
+energy_empty = ExtResource("4_temqn")
+energy_fill = ExtResource("3_orymg")
+
+[node name="healthbar_player" type="ProgressBar" parent="."]
+z_index = 1
+offset_left = 132.0
+offset_top = 56.0
+offset_right = 275.0
+offset_bottom = 91.0
+theme_override_styles/background = SubResource("StyleBoxEmpty_ujpt8")
+theme_override_styles/fill = SubResource("StyleBoxFlat_oil0j")
+value = 50.0
+show_percentage = false
+script = ExtResource("2_ujpt8")
+
+[node name="damagebar_player" type="ProgressBar" parent="healthbar_player"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_ujpt8")
+theme_override_styles/fill = SubResource("StyleBoxFlat_temqn")
+value = 80.0
+show_percentage = false
+
+[node name="Timer_player" type="Timer" parent="healthbar_player"]
+wait_time = 0.4
+one_shot = true
+
+[node name="HpBarEmpty2" type="TextureRect" parent="healthbar_player"]
+z_index = -2
+layout_mode = 0
+offset_right = 145.0
+offset_bottom = 40.0
+texture = SubResource("CanvasTexture_ujpt8")
+
+[node name="HpBarEmpty" type="Sprite2D" parent="healthbar_player"]
+position = Vector2(26, 13)
+scale = Vector2(5.690789, 5.690789)
+texture = ExtResource("1_oil0j")
+
+[node name="EnergyUI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 336.0
+offset_bottom = 185.0
+
+[node name="Energy1" type="TextureRect" parent="EnergyUI"]
+layout_mode = 0
+offset_left = 229.0
+offset_top = 113.895
+offset_right = 269.0
+offset_bottom = 153.89502
+texture = ExtResource("4_temqn")
+stretch_mode = 5
+
+[node name="Energy2" type="TextureRect" parent="EnergyUI"]
+layout_mode = 0
+offset_left = 169.0
+offset_top = 113.895
+offset_right = 209.0
+offset_bottom = 153.89502
+texture = ExtResource("4_temqn")
+stretch_mode = 5
+
+[node name="Energy3" type="TextureRect" parent="EnergyUI"]
+layout_mode = 0
+offset_left = 110.0
+offset_top = 113.895
+offset_right = 150.0
+offset_bottom = 153.89502
+texture = ExtResource("4_temqn")
+stretch_mode = 5
+
+[node name="LowHPVignette" type="ColorRect" parent="."]
+z_index = 50
+offset_left = -13.0
+offset_top = -12.0
+offset_right = 1169.0
+offset_bottom = 656.0
+color = Color(0.5411765, 0.09803922, 0.09803922, 0.3137255)
+
+[connection signal="timeout" from="healthbar_player/Timer_player" to="." method="_on_timer_player_timeout"]

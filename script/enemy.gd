@@ -1,5 +1,8 @@
 extends CharacterBody2D
 
+@export var max_hp := 5
+var hp := 0
+
 @export var shoot_interval := 2.0
 @export var projectile_speed := 150.0
 @export var projectile_scene : PackedScene = preload("res://scenes/arrow.tscn")
@@ -9,9 +12,12 @@ var shoot_timer := 0.0
 var player : Node2D
 
 func _ready():
-	player = get_tree().get_first_node_in_group("player") # ให้ Player อยู่ใน group "player"
-	
-	
+	add_to_group("enemy")
+	hp = max_hp
+	if healthbar and healthbar.has_method("init_health"):
+		healthbar.init_health(max_hp)
+
+	player = get_tree().get_first_node_in_group("player")
 
 func _process(delta):
 	if player == null:
@@ -21,27 +27,34 @@ func _process(delta):
 
 	if player == null:
 		return
-	
+
 	shoot_timer -= delta
 	if shoot_timer <= 0:
 		shoot_timer = shoot_interval
 		shoot_projectile()
 
+func take_damage(amount: int) -> void:
+	hp -= amount
+	if healthbar:
+		healthbar.health = hp
+
+	if hp <= 0:
+		die()
+
+func die() -> void:
+	# (ขั้นต่ำสุด) ตายแล้วหายไป
+	queue_free()
+
 func shoot_projectile():
 	if projectile_scene == null:
 		push_error("projectile_scene not set on Enemy!")
 		return
-
 	if player == null:
 		push_error("player is null in Enemy!")
 		return
 
 	var p = projectile_scene.instantiate()
 	get_tree().current_scene.add_child(p)
-
 	p.global_position = global_position
-
-	# ตั้งเป้า กับความเร็ว
 	p.target = player
 	p.speed = projectile_speed
-	print("Shot projectile, target =", p.target)
