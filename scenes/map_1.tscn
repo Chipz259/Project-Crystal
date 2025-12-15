@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://28mq4v83qf6k" path="res://script/map_1.gd" id="1_lj2ar"]
 [ext_resource type="Texture2D" uid="uid://o1cii2hjm3nm" path="res://assets/origbig.png" id="2_0dnla"]
 [ext_resource type="PackedScene" uid="uid://cgd0ksnrtlb2y" path="res://scenes/enemy.tscn" id="2_3okoh"]
-[ext_resource type="PackedScene" path="res://scenes/player_health_bar.tscn" id="4_00lji"]
+[ext_resource type="PackedScene" uid="uid://pdo4xujgur46" path="res://scenes/player_health_bar.tscn" id="4_00lji"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_ibqsa"]
 
@@ -12,24 +12,21 @@
 script = ExtResource("1_lj2ar")
 
 [node name="Origbig" type="Sprite2D" parent="."]
-position = Vector2(580.22217, 324.5)
-scale = Vector2(0.50848764, 0.50848764)
+position = Vector2(981.1112, 550.00006)
+scale = Vector2(0.8564816, 0.85648155)
 texture = ExtResource("2_0dnla")
 
-[node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(574, 330)
-
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
-position = Vector2(550, 519)
+position = Vector2(985, 903)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(-7, 44)
 shape = SubResource("WorldBoundaryShape2D_ibqsa")
 
 [node name="player" parent="." instance=ExtResource("1_ibhou")]
-position = Vector2(124, 480)
+position = Vector2(223, 841)
 
 [node name="enemy" parent="." instance=ExtResource("2_3okoh")]
-position = Vector2(919, 517)
+position = Vector2(1663, 924)
 
 [node name="player_health_bar" parent="." instance=ExtResource("4_00lji")]

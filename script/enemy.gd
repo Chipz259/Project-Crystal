@@ -8,7 +8,7 @@ var hp := 0
 @export var shard_reward: int = 1
 var core_reward: int = 1
 
-@export var shoot_interval := 2.0
+@export var shoot_interval := 1.0
 @export var projectile_speed := 150.0
 @export var projectile_scene : PackedScene = preload("res://scenes/arrow.tscn")
 @onready var healthbar = $healthbar

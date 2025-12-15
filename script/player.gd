@@ -13,6 +13,27 @@ var block_cd_timer := 0.0
 @export var parry_hitstop := 0.06
 @export var parry_shake_amount := 10.0
 @export var parry_shake_duration := 0.12
+var _parry_success_this_block := false
+var _parry_consumed := false
+
+@export var base_heal_amount := 1
+
+var max_hp := 5
+var hp := max_hp
+var invincible := false
+
+var spawn_pos := Vector2.ZERO
+var energy := 0
+
+var blocking := false
+var block_timer := 0.0
+var _hitstop_lock := false
+
+const SPEED = 300.0
+const JUMP_VELOCITY = -400.0
+
+var anim_state : AnimState = AnimState.IDLE
+@onready var anim := $AnimatedSprite2D
 
 enum AnimState {
 	IDLE,
@@ -24,22 +45,6 @@ enum AnimState {
 	HIT,
 	DEAD
 }
-
-var anim_state : AnimState = AnimState.IDLE
-@onready var anim := $AnimatedSprite2D
-
-var max_hp := 5
-var hp := max_hp
-
-var spawn_pos := Vector2.ZERO
-var energy := 0
-
-var blocking := false
-var block_timer := 0.0
-var _hitstop_lock := false
-
-const SPEED = 300.0
-const JUMP_VELOCITY = -400.0
 
 func _physics_process(delta: float) -> void:
 	# ✅ Freeze ระหว่าง block window
@@ -118,6 +123,16 @@ func _ready():
 	spawn_pos = global_position
 	print("Player added to group 'player'", self)
 
+	# ✅ restore state จาก GameState ถ้ามี
+	var saved := GameState.consume_player_state()
+	var sh := int(saved.get("hp", -1))
+	var se := int(saved.get("energy", -1))
+
+	if sh >= 0:
+		hp = clamp(sh, 0, max_hp)
+	if se >= 0:
+		energy = clamp(se, 0, MAX_ENERGY)
+
 func _process(delta):
 	# --- ลด cooldown ---
 	if block_cd_timer > 0.0:
@@ -128,9 +143,15 @@ func _process(delta):
 		block_timer -= delta
 		if block_timer <= 0.0:
 			blocking = false
-			block_cd_timer = block_cooldown
-			print("BLOCK window ended -> cooldown started:", snapped(block_cd_timer, 0.01))
+			# ✅ ถ้า parry สำเร็จในบล็อกนี้ -> ไม่ติดคูลดาวน์
+			if _parry_success_this_block:
+				block_cd_timer = 0.0
+				print("CHAIN PARRY! No cooldown")
+			else:
+				block_cd_timer = block_cooldown
+				print("BLOCK window ended -> cooldown started:", snapped(block_cd_timer, 0.01))
 
+	# --- กด block ---
 	# --- กด block ---
 	if Input.is_action_just_pressed("block"):
 		if blocking:
@@ -139,7 +160,10 @@ func _process(delta):
 			print("BLOCK on cooldown:", snapped(block_cd_timer, 0.01))
 		else:
 			print("BLOCK pressed")
+
+			# ✅ เริ่ม parry ใหม่
 			blocking = true
+			_parry_consumed = false   # <<<<<< ใส่ตรงนี้
 			block_timer = perfect_block_window + GameState.parry_window_bonus
 
 	# --- ยิง energy ตามเดิม ---
@@ -147,30 +171,52 @@ func _process(delta):
 		print("SHOOT ENERGY, stack =", energy)
 		shoot_energy()
 		energy = 0
+
+	# --- heal ด้วย energy 1 ---
+	if Input.is_action_just_pressed("heal"):
+		try_heal()
 		
 	update_anim_fsm()
 
-
-
 func on_projectile_hit(projectile):
-	if blocking:
+	# 1) parry สำเร็จ
+	if blocking and not _parry_consumed:
+		_parry_consumed = true
+
 		energy = min(energy + 1, MAX_ENERGY)
 		projectile.queue_free()
-		# (ใส่ hitstop/shake/flash_parry ได้ตามเดิม)
 
-		print("Blocked! Energy =", energy)
-
-		# ✅ parry feedback
 		flash_parry()
 		get_tree().current_scene.screen_shake(5.0, 0.09)
 		hitstop(0.1, 0.15)
-	else:
+
+		# จบ parry ทันที
+		blocking = false
+		block_timer = 0.0
+		block_cd_timer = 0.0
+		print("Parry consumed -> press again for next projectile")
+		return
+
+	# ✅ invincible: โดนแล้วให้หายไปเฉย ๆ (กันบัคช่วง transition)
+	if invincible:
+		projectile.queue_free()
+		return
+
+	# 2) ถือบล็อกอยู่แต่ parry ถูกใช้ไปแล้ว -> ปกติจะโดนดาเมจ
+	if blocking and _parry_consumed:
 		flash_damage()
 		get_tree().current_scene.screen_shake(8.0, 0.12)
 		hitstop(0.04, 0.05)
-
 		take_damage(1)
 		projectile.queue_free()
+		return
+
+	# 3) ไม่ได้บล็อก -> โดนดาเมจ
+	flash_damage()
+	get_tree().current_scene.screen_shake(8.0, 0.12)
+	hitstop(0.04, 0.05)
+	take_damage(1)
+	projectile.queue_free()
 
 func shoot_energy():
 	var stack := energy # จำไว้ก่อนรีเซ็ต
@@ -200,6 +246,10 @@ func flash_damage():
 	tween.tween_property(sprite, "modulate", Color(1, 1, 1, 1), 0.1)
 
 func take_damage(amount: int) -> void:
+	if invincible:
+		print("Damage ignored: invincible")
+		return
+
 	hp -= amount
 	if hp <= 0:
 		die()
@@ -260,3 +310,21 @@ func parry_feedback():
 
 	# 3) flash
 	flash_parry()
+
+func try_heal() -> void:
+	if energy < 1:
+		print("HEAL failed: no energy")
+		return
+	if hp >= max_hp:
+		print("HEAL blocked: hp full")
+		return
+
+	energy -= 1
+
+	var heal_amount := base_heal_amount + GameState.heal_bonus
+	hp = min(hp + heal_amount, max_hp)
+
+	print("HEAL +", heal_amount, " hp=", hp, "/", max_hp, " energy=", energy)
+
+	# optional feedback
+	flash_parry() # ถ้าอยากแยกสีเขียว เดี๋ยวแชททำให้

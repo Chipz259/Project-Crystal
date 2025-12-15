@@ -1,15 +1,20 @@
-[gd_scene load_steps=12 format=3 uid="uid://d1ceqx38duixo"]
+[gd_scene load_steps=15 format=3 uid="uid://d1ceqx38duixo"]
 
 [ext_resource type="Texture2D" uid="uid://o1cii2hjm3nm" path="res://assets/origbig.png" id="1_glvj0"]
 [ext_resource type="Script" uid="uid://2oytefrwwtqt" path="res://script/UpgradeShrine.gd" id="1_h51b1"]
 [ext_resource type="Texture2D" uid="uid://4q335xxs2p" path="res://icon.svg" id="2_h51b1"]
 [ext_resource type="PackedScene" uid="uid://dmlxdue07l5hy" path="res://scenes/player.tscn" id="2_vkrrq"]
+[ext_resource type="Script" uid="uid://crb6nskgon4al" path="res://script/ShopZone.gd" id="4_yc1ka"]
 [ext_resource type="PackedScene" uid="uid://cpykr0eqqx0dx" path="res://scenes/UpgradePanel.tscn" id="5_rpjn8"]
 [ext_resource type="PackedScene" uid="uid://pdo4xujgur46" path="res://scenes/player_health_bar.tscn" id="6_slfnn"]
 [ext_resource type="Script" uid="uid://d25yalo6qwj8o" path="res://script/ExitZone.gd" id="7_slfnn"]
+[ext_resource type="PackedScene" uid="uid://fqthdmg6vku3" path="res://scenes/shop_panel.tscn" id="9_wxub3"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_t2xha"]
 blend_mode = 2
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_slfnn"]
+size = Vector2(359, 337.5)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rpjn8"]
 size = Vector2(163, 141)
@@ -17,34 +22,59 @@ size = Vector2(163, 141)
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_33fdb"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yc1ka"]
-size = Vector2(62, 242)
+size = Vector2(196, 242)
 
 [node name="UpgradeShrine" type="Area2D"]
 script = ExtResource("1_h51b1")
 upgrade_panel_path = NodePath("UpgradePanel")
 
-[node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(574, 330)
-zoom = Vector2(1.75, 1.75)
-
 [node name="UpgradePanel" parent="." instance=ExtResource("5_rpjn8")]
 
 [node name="Origbig" type="Sprite2D" parent="."]
 material = SubResource("CanvasItemMaterial_t2xha")
-position = Vector2(619.0001, 295)
-scale = Vector2(0.5763889, 0.5763889)
+position = Vector2(940.99994, 524)
+scale = Vector2(0.89853394, 0.89853394)
 texture = ExtResource("1_glvj0")
 
+[node name="Shop" type="Area2D" parent="."]
+script = ExtResource("4_yc1ka")
+shop_panel_path = NodePath("../ShopPanel")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Shop"]
+position = Vector2(1130, 708)
+shape = SubResource("RectangleShape2D_slfnn")
+
+[node name="Sprite2D" type="Sprite2D" parent="Shop"]
+position = Vector2(1135, 766)
+scale = Vector2(2.2343755, 2.2343755)
+texture = ExtResource("2_h51b1")
+
+[node name="Label" type="Label" parent="Shop"]
+offset_left = 821.0
+offset_top = 716.0
+offset_right = 977.0
+offset_bottom = 750.0
+theme_override_font_sizes/font_size = 24
+text = "[E] to interact"
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(562, 482)
+position = Vector2(468, 802)
 shape = SubResource("RectangleShape2D_rpjn8")
 
-[node name="Sprite2D" type="Sprite2D" parent="CollisionShape2D"]
+[node name="Shrine" type="Sprite2D" parent="CollisionShape2D"]
 position = Vector2(-2, 2)
 texture = ExtResource("2_h51b1")
 
+[node name="Label" type="Label" parent="CollisionShape2D"]
+offset_left = -193.0
+offset_top = -116.0
+offset_right = 195.0
+offset_bottom = -82.0
+theme_override_font_sizes/font_size = 24
+text = "[E] Upgrade (เกมจริงไม่มีให้กดแบบนี้)"
+
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
-position = Vector2(556, 545)
+position = Vector2(935, 879)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
 shape = SubResource("WorldBoundaryShape2D_33fdb")
@@ -55,17 +85,21 @@ position = Vector2(177, 456)
 [node name="player_health_bar" parent="." instance=ExtResource("6_slfnn")]
 
 [node name="ExitZone" type="Area2D" parent="."]
+position = Vector2(778, 236)
 script = ExtResource("7_slfnn")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ExitZone"]
-position = Vector2(1102, 508)
+position = Vector2(1035, 508)
 shape = SubResource("RectangleShape2D_yc1ka")
 
 [node name="Prompt" type="Label" parent="ExitZone"]
-offset_left = 840.0
+offset_left = 815.0
 offset_top = 454.0
 offset_right = 1075.0
-offset_bottom = 477.0
+offset_bottom = 488.0
+theme_override_font_sizes/font_size = 24
 text = "[E] to continue deeper"
 horizontal_alignment = 1
 autowrap_mode = 2
+
+[node name="ShopPanel" parent="." instance=ExtResource("9_wxub3")]
