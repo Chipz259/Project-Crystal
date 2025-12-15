@@ -20,6 +20,8 @@ func _on_body_entered(body):
 	print("arrow hit:", body)
 	if body.is_in_group("player"):
 		body.on_projectile_hit(self)
+	if is_inside_tree():
+		queue_free()
 
 func _ready():
 	print("Arrow spawned, initial target =", target)

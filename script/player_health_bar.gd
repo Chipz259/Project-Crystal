@@ -29,9 +29,11 @@ func _ready() -> void:
 	print("low_hp_vignette =", low_hp_vignette)
 	player = get_tree().get_first_node_in_group("player")
 	_sync_max_hp()
+	
 	shard_label.text = str(GameState.run_shards)
 	if not GameState.run_shards_changed.is_connected(_on_shards_changed):
 		GameState.run_shards_changed.connect(_on_shards_changed)
+
 	core_label.text = str(GameState.cores)
 	if not GameState.cores_changed.is_connected(_on_cores_changed):
 		GameState.cores_changed.connect(_on_cores_changed)
