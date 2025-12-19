@@ -4,10 +4,10 @@ const MAX_ENERGY := 3
 @export var block_cooldown := 0.6   # คูลดาวน์หลังบล็อก (ปรับได้)
 var block_cd_timer := 0.0
 
-@export var energy_damage_by_stack := [1, 3, 6] 
+@export var energy_damage_by_stack := [100, 300, 600] 
 # มี 1 energy = 1 dmg, มี 2 = 3 dmg, มี 3 = 6 dmg (ปรับเลขได้ตามใจ)
 
-@export var perfect_block_window := 0.20  # เวลาบล็อกพอดีตอนกระสุนชน
+@export var perfect_block_window := 0.35  # เวลาบล็อกพอดีตอนกระสุนชน
 @export var energy_projectile_scene : PackedScene = preload("res://scenes/energy.tscn")
 
 @export var parry_hitstop := 0.06
@@ -23,7 +23,7 @@ var hp := max_hp
 var invincible := false
 
 var spawn_pos := Vector2.ZERO
-var energy := 0
+var energy := 1
 
 var blocking := false
 var block_timer := 0.0
@@ -31,6 +31,17 @@ var _hitstop_lock := false
 
 const SPEED = 300.0
 const JUMP_VELOCITY = -400.0
+
+@export var dash_speed := 1350.0
+@export var dash_duration := 0.35
+@export var dash_cooldown := 0.65
+@export var dash_iframe := 0.35
+
+var is_dashing := false
+var dash_dir := Vector2.RIGHT
+var dash_timer := 0.0
+var dash_cd_timer := 0.0
+var dash_iframe_timer := 0.0
 
 var anim_state : AnimState = AnimState.IDLE
 @onready var anim := $AnimatedSprite2D
@@ -43,14 +54,23 @@ enum AnimState {
 	BLOCK,
 	SHOOT,
 	HIT,
-	DEAD
+	DEAD,
+	DASH
 }
 
 func _physics_process(delta: float) -> void:
+	# ✅ Dash overrides everything
+	if is_dashing:
+		velocity = dash_dir * dash_speed
+		move_and_slide()
+		update_anim_fsm()
+		return
+
 	# ✅ Freeze ระหว่าง block window
 	if blocking:
 		velocity = Vector2.ZERO
 		move_and_slide()
+		update_anim_fsm()
 		return
 
 	# ----- ของเดิม -----
@@ -74,6 +94,8 @@ func update_anim_fsm() -> void:
 	# ---- Highest priority (override everything visually) ----
 	if hp <= 0:
 		new_state = AnimState.DEAD
+	elif is_dashing:
+		new_state = AnimState.DASH
 	elif blocking:
 		new_state = AnimState.BLOCK   # works mid-air
 	elif not is_on_floor():
@@ -115,6 +137,8 @@ func play_anim_for_state(state: AnimState) -> void:
 			anim.play("hit")
 		AnimState.DEAD:
 			anim.play("dead")
+		AnimState.DASH:
+			anim.play("dash")
 
 
 func _ready():
@@ -134,7 +158,27 @@ func _ready():
 		energy = clamp(se, 0, MAX_ENERGY)
 
 func _process(delta):
-	# --- ลด cooldown ---
+	# --- dash cooldown ---
+	if dash_cd_timer > 0.0:
+		dash_cd_timer -= delta
+
+	# --- dash timers ---
+	if is_dashing:
+		dash_timer -= delta
+		if dash_timer <= 0.0:
+			is_dashing = false
+
+	if dash_iframe_timer > 0.0:
+		dash_iframe_timer -= delta
+		if dash_iframe_timer <= 0.0:
+			# จบ i-frame
+			invincible = false
+
+	# --- press dash ---
+	if Input.is_action_just_pressed("dash"):
+		try_dash()
+
+	# --- ลด cooldown block ---
 	if block_cd_timer > 0.0:
 		block_cd_timer -= delta
 
@@ -143,15 +187,9 @@ func _process(delta):
 		block_timer -= delta
 		if block_timer <= 0.0:
 			blocking = false
-			# ✅ ถ้า parry สำเร็จในบล็อกนี้ -> ไม่ติดคูลดาวน์
-			if _parry_success_this_block:
-				block_cd_timer = 0.0
-				print("CHAIN PARRY! No cooldown")
-			else:
-				block_cd_timer = block_cooldown
-				print("BLOCK window ended -> cooldown started:", snapped(block_cd_timer, 0.01))
+			block_cd_timer = block_cooldown
+			print("BLOCK window ended -> cooldown started:", snapped(block_cd_timer, 0.01))
 
-	# --- กด block ---
 	# --- กด block ---
 	if Input.is_action_just_pressed("block"):
 		if blocking:
@@ -160,11 +198,14 @@ func _process(delta):
 			print("BLOCK on cooldown:", snapped(block_cd_timer, 0.01))
 		else:
 			print("BLOCK pressed")
-
-			# ✅ เริ่ม parry ใหม่
 			blocking = true
-			_parry_consumed = false   # <<<<<< ใส่ตรงนี้
+			_parry_consumed = false
 			block_timer = perfect_block_window + GameState.parry_window_bonus
+
+	# --- heal ---
+	if Input.is_action_just_pressed("heal"):
+		if not is_dashing and not blocking:
+			try_heal()
 
 	# --- ยิง energy ตามเดิม ---
 	if Input.is_action_just_pressed("shoot_energy") and energy > 0:
@@ -172,10 +213,6 @@ func _process(delta):
 		shoot_energy()
 		energy = 0
 
-	# --- heal ด้วย energy 1 ---
-	if Input.is_action_just_pressed("heal"):
-		try_heal()
-		
 	update_anim_fsm()
 
 func on_projectile_hit(projectile):
@@ -187,7 +224,12 @@ func on_projectile_hit(projectile):
 		projectile.queue_free()
 
 		flash_parry()
-		get_tree().current_scene.screen_shake(5.0, 0.09)
+		if get_tree().current_scene.has_method("screen_shake"):
+			get_tree().current_scene.screen_shake(5.0, 0.09)
+		
+		anim.play("block") # ย้ำว่าเป็นท่า block (หรือท่า parry ถ้ามี)
+		anim.frame = 1     # บังคับให้เป็นเฟรมที่ 1 (เฟรมที่ 2 ของภาพ) ทันที!
+		
 		hitstop(0.1, 0.15)
 
 		# จบ parry ทันที
@@ -205,7 +247,8 @@ func on_projectile_hit(projectile):
 	# 2) ถือบล็อกอยู่แต่ parry ถูกใช้ไปแล้ว -> ปกติจะโดนดาเมจ
 	if blocking and _parry_consumed:
 		flash_damage()
-		get_tree().current_scene.screen_shake(8.0, 0.12)
+		if get_tree().current_scene.has_method("screen_shake"):
+			get_tree().current_scene.screen_shake(8.0, 0.12)
 		hitstop(0.04, 0.05)
 		take_damage(1)
 		projectile.queue_free()
@@ -213,7 +256,8 @@ func on_projectile_hit(projectile):
 
 	# 3) ไม่ได้บล็อก -> โดนดาเมจ
 	flash_damage()
-	get_tree().current_scene.screen_shake(8.0, 0.12)
+	if get_tree().current_scene.has_method("screen_shake"):
+			get_tree().current_scene.screen_shake(8.0, 0.12)
 	hitstop(0.04, 0.05)
 	take_damage(1)
 	projectile.queue_free()
@@ -303,7 +347,7 @@ func parry_feedback():
 	# 1) screen shake
 	var scene := get_tree().current_scene
 	if scene and scene.has_method("screen_shake"):
-		scene.screen_shake(parry_shake_amount, parry_shake_duration)
+		scene.screen_shake(5.0, 0.09)
 
 	# 2) hitstop (freeze ทั้งเกม)
 	hitstop(parry_hitstop)
@@ -328,3 +372,91 @@ func try_heal() -> void:
 
 	# optional feedback
 	flash_parry() # ถ้าอยากแยกสีเขียว เดี๋ยวแชททำให้
+
+func try_dash() -> void:
+	if is_dashing:
+		return
+	if dash_cd_timer > 0.0:
+		return
+	if blocking:
+		return  # กัน dash ระหว่าง parry window (ถ้าอยากให้ dash ได้ตอน block บอกแชท)
+
+	# เลือกทิศจาก input
+	var x := Input.get_axis("ui_left", "ui_right")
+	if x != 0:
+		dash_dir = Vector2(signf(x), 0)
+	else:
+		# ถ้าไม่กดทิศ ใช้ทิศที่หันหน้าอยู่
+		# flip_h = true หมายถึงหันซ้าย
+		dash_dir = Vector2.LEFT if anim.flip_h else Vector2.RIGHT
+
+	# เริ่ม dash
+	is_dashing = true
+	dash_timer = dash_duration
+	dash_cd_timer = dash_cooldown
+
+	# ✅ i-frame
+	invincible = true
+	dash_iframe_timer = dash_iframe
+
+# Melee Parry จากศัตรู
+func handle_incoming_attack(attack_data: Dictionary) -> void:
+	# 1. เช็คว่าอยู่ในสถานะอมตะจากการ Dash หรือไม่
+	if invincible:
+		print("Dodged attack with Dash/I-frame!")
+		return
+
+	# 2. เช็คทิศทาง: Player ต้องหันหน้าเข้าหาศัตรูถึงจะกันได้
+	# attack_data["direction"].x คือทิศที่ศัตรูหัน (1=ขวา, -1=ซ้าย)
+	# ถ้าศัตรูหันขวา (1) เราต้องหันซ้าย (flip_h = true) เพื่อรับหน้ากัน
+	var enemy_facing = attack_data["direction"].x
+	var my_facing = -1 if anim.flip_h else 1
+	var is_facing_each_other = (enemy_facing != my_facing)
+
+	# 3. คำนวณ Parry / Block
+	if blocking and is_facing_each_other:
+		
+		# --- PARRY SUCCESS (บล็อกทันในเวลา Perfect) ---
+		if not _parry_consumed:
+			_parry_consumed = true
+			
+			print("!!! MELEE PARRY SUCCESS !!!")
+			
+			# เพิ่ม Energy
+			energy = min(energy + 1, MAX_ENERGY)
+			
+			# Effect ต่างๆ (เอามาจาก on_projectile_hit ของคุณ)
+			flash_parry()
+			if get_tree().current_scene.has_method("screen_shake"):
+				get_tree().current_scene.screen_shake(8.0, 0.15)
+			
+			anim.play("block")
+			anim.frame = 1
+			
+			hitstop(0.15, 0.1) # หยุดเกมนานกว่ากระสุนหน่อย เพราะดาบมันหนัก
+			
+			# !!! สำคัญ !!! สั่งให้ศัตรูติด Stun
+			var attacker = attack_data.get("source")
+			if attacker and attacker.has_method("get_stunned"):
+				attacker.get_stunned()
+			
+			# จบการทำงาน (ไม่โดนดาเมจ)
+			blocking = false
+			return
+
+		# --- BLOCK (กันได้แต่ไม่ Perfect) ---
+		else:
+			print("Blocked (Reduced Damage)")
+			hitstop(0.05, 0.05)
+			# โดนดาเมจครึ่งเดียว หรือไม่โดนเลยตามใจคุณ
+			# take_damage(attack_data["damage"]) # ถ้าอยากให้โดนเต็ม
+			return 
+			
+	# 4. ถ้ากันไม่ได้ หรือหันหลังให้ -> โดนเต็มๆ
+	print("Hit taken!")
+	hitstop(0.04, 0.05)
+	flash_damage()
+	if get_tree().current_scene.has_method("screen_shake"):
+		get_tree().current_scene.screen_shake(8.0, 0.12)
+		
+	take_damage(attack_data["damage"])

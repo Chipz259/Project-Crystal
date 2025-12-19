@@ -3,7 +3,7 @@ extends Node
 signal run_shards_changed(value: int)
 signal cores_changed(value: int)
 
-var run_shards: int = 1000
+var run_shards: int = 0
 var cores: int = 0
 
 # ✅ อัปเกรด: ได้ shard เพิ่ม “ต่อครั้งที่ได้ shard”
@@ -15,6 +15,9 @@ var heal_upgrade_taken: bool = false
 
 var saved_hp: int = -1
 var saved_energy: int = -1
+
+var current_hp: int = -1       # -1 แปลว่ายังไม่มีค่า (ให้ใช้ค่าเริ่มต้น)
+var current_energy: int = -1
 
 func save_player_state(hp: int, energy: int) -> void:
 	saved_hp = hp
@@ -48,3 +51,8 @@ func reset_run() -> void:
 	cores_changed.emit(cores)
 	saved_hp = -1
 	saved_energy = -1
+
+func reset_player_state():
+	current_hp = -1
+	current_energy = -1
+	# reset โบนัสอื่นๆ ด้วยก็ได้

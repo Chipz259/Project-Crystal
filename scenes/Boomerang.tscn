@@ -1,0 +1,77 @@
+[gd_scene load_steps=12 format=3 uid="uid://cnol155fk44ya"]
+
+[ext_resource type="Script" uid="uid://xdsh2uwxc8f0" path="res://script/Boomerang.gd" id="1_m3wt4"]
+[ext_resource type="Texture2D" uid="uid://bbfufadv31mrc" path="res://assets/x300_Boss2/boomarang arms.png" id="1_wllw3"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m3wt4"]
+atlas = ExtResource("1_wllw3")
+region = Rect2(0, 0, 603, 282)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gb7w0"]
+atlas = ExtResource("1_wllw3")
+region = Rect2(603, 0, 603, 282)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qm14c"]
+atlas = ExtResource("1_wllw3")
+region = Rect2(1206, 0, 603, 282)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ckqb7"]
+atlas = ExtResource("1_wllw3")
+region = Rect2(1809, 0, 603, 282)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ndthh"]
+atlas = ExtResource("1_wllw3")
+region = Rect2(2412, 0, 603, 282)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ss04e"]
+atlas = ExtResource("1_wllw3")
+region = Rect2(3015, 0, 603, 282)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tm3am"]
+atlas = ExtResource("1_wllw3")
+region = Rect2(3618, 0, 603, 282)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_7cay4"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m3wt4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gb7w0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qm14c")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ckqb7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ndthh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ss04e")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tm3am")
+}],
+"loop": true,
+"name": &"spin",
+"speed": 12.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jujf2"]
+size = Vector2(278, 129)
+
+[node name="boomerang" type="Area2D"]
+collision_layer = 8
+collision_mask = 3
+script = ExtResource("1_m3wt4")
+
+[node name="Anim" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_7cay4")
+animation = &"spin"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-96, 29.5)
+shape = SubResource("RectangleShape2D_jujf2")

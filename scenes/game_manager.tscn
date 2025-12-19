@@ -1,0 +1,16 @@
+[gd_scene load_steps=8 format=3 uid="uid://sd5kxrwihknx"]
+
+[ext_resource type="Script" uid="uid://db2yqw7ijfh8r" path="res://script/GameManager.gd" id="1_hwd4i"]
+[ext_resource type="PackedScene" uid="uid://ci5wlsvaw0v3i" path="res://scenes/Room_01.tscn" id="2_glms7"]
+[ext_resource type="PackedScene" uid="uid://bdmpsracm3m1g" path="res://scenes/Room_02.tscn" id="3_oo155"]
+[ext_resource type="PackedScene" uid="uid://cqe2wetdyswdv" path="res://scenes/Room_03.tscn" id="4_eaq8r"]
+[ext_resource type="PackedScene" uid="uid://urnb1uqid2d5" path="res://scenes/MapMiniboss.tscn" id="5_ternb"]
+[ext_resource type="PackedScene" uid="uid://ns4d6txf2vv5" path="res://scenes/MapBoss.tscn" id="6_q8mjp"]
+[ext_resource type="PackedScene" uid="uid://oy0oix8oui0d" path="res://scenes/ShopEndless.tscn" id="7_q8mjp"]
+
+[node name="GameManager" type="Node2D"]
+script = ExtResource("1_hwd4i")
+normal_maps = Array[PackedScene]([ExtResource("2_glms7"), ExtResource("3_oo155"), ExtResource("4_eaq8r")])
+miniboss_map = ExtResource("5_ternb")
+boss_map = ExtResource("6_q8mjp")
+shop_map = ExtResource("7_q8mjp")

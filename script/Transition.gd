@@ -10,9 +10,11 @@ extends CanvasLayer
 
 # ✅ zoom-in during fade-out (0.6 = zoom in, 1.0 = normal)
 @export var zoom_in_factor: float = 0.65  # < 1.0 = zoom IN, > 1.0 = zoom OUT
-@export var zoom_ease: float = 1.0 # 1.0 = linear-ish, 0.0 = more smooth (ใช้ easing ใน tween ด้านล่าง)
+@export var zoom_ease: float = 1.0 # 1.0 = linear-ish, 0.0 = more smooth
 
+# ✅ แยก Scene ปกติ กับ Endless ออกจากกัน
 @export var upgrade_panel_scene: PackedScene = preload("res://scenes/UpgradePanel.tscn")
+@export var upgrade_panel_endless_scene: PackedScene = preload("res://scenes/UpgradePanelEndless.tscn")
 
 var _overlay: ColorRect
 var _label: Label
@@ -31,10 +33,6 @@ func _ready() -> void:
 	_overlay.anchor_top = 0
 	_overlay.anchor_right = 1
 	_overlay.anchor_bottom = 1
-	_overlay.offset_left = 0
-	_overlay.offset_top = 0
-	_overlay.offset_right = 0
-	_overlay.offset_bottom = 0
 	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_overlay.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(_overlay)
@@ -74,7 +72,7 @@ func fade_in_from_white_async(time: float = -1.0) -> void:
 	_overlay.visible = true
 	_overlay.modulate.a = 1.0
 	var t := create_tween()
-	t.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS) # ✅ ทำงานแม้ paused
+	t.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	t.tween_property(_overlay, "modulate:a", 0.0, time)
 	await t.finished
 
@@ -95,14 +93,17 @@ func _type_text(text: String) -> void:
 	_label.visible_characters = total
 	_typing = false
 
-func boss_clear_to_scene(next_scene: String, story_text: String = "") -> void:
+# ------------------------------------------------------------------
+# ✅ UPDATE: เพิ่ม parameter is_endless (default = false)
+# ------------------------------------------------------------------
+func boss_clear_to_scene(next_scene: String, story_text: String = "", is_endless: bool = false) -> void:
 	if _is_busy:
 		return
 	_is_busy = true
 
 	Engine.time_scale = 1.0
 
-	# ✅ freeze เกมทั้งหมด
+	# Freeze เกม
 	_prev_paused = get_tree().paused
 	get_tree().paused = true
 
@@ -113,7 +114,8 @@ func boss_clear_to_scene(next_scene: String, story_text: String = "") -> void:
 	if p:
 		p.set("invincible", true)
 
-	# 1) Fade to white + zoom in พร้อมกัน
+	# 1) Fade to white + zoom in
+	_overlay.color = Color.WHITE
 	_overlay.visible = true
 	_overlay.modulate.a = 0.0
 
@@ -123,13 +125,12 @@ func boss_clear_to_scene(next_scene: String, story_text: String = "") -> void:
 	# fade
 	tw.tween_property(_overlay, "modulate:a", 1.0, fade_out_time)
 
-	# zoom (ถ้ามี player)
+	# zoom
 	if cam != null:
 		var z := Vector2(zoom_in_factor, zoom_in_factor)
 		var zoom_t := tw.parallel().tween_property(cam, "zoom", z, fade_out_time)
 		zoom_t.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
-		# focus ตาม player ระหว่างเฟด เผื่อ player ไม่อยู่กลาง
 		var player: Node2D = get_tree().get_first_node_in_group("player") as Node2D
 		if player != null:
 			var pos_t := tw.parallel().tween_property(cam, "global_position", player.global_position, fade_out_time)
@@ -144,49 +145,55 @@ func boss_clear_to_scene(next_scene: String, story_text: String = "") -> void:
 		_label.visible = false
 		_label.modulate.a = 0.0
 
-	# ✅ 3) ขณะยัง “ขาวเต็มจอ” ให้ขึ้น Upgrade เลย
-	await _show_upgrade_on_white()
+	# 3) Show Upgrade (ส่งค่า is_endless ไปด้วย)
+	await _show_upgrade_on_white(is_endless)
 
-	# ✅ save player hp/energy ก่อนเปลี่ยนฉาก
+	# Save player hp/energy
 	if p:
-		GameState.save_player_state(int(p.get("hp")), int(p.get("energy")))
+		if GameState.has_method("save_player_state"):
+			GameState.save_player_state(int(p.get("hp")), int(p.get("energy")))
 
-	# ลบกล้องชั่วคราว (ของฉากเก่า) ถ้ายังอยู่
+	# ลบกล้องชั่วคราว
 	if is_instance_valid(cam):
 		cam.queue_free()
 
-	# 4) เปลี่ยนฉากไป hub/shop (ยังขาวอยู่)
+	# 4) เปลี่ยนฉาก
 	get_tree().change_scene_to_file(next_scene)
 	
-	# เข้า scene ใหม่ปุ๊บ เดินได้เลย
 	get_tree().paused = _prev_paused
+	_is_busy = false
 
-	# ปิดอมตะใน scene ใหม่ (รอ 1 เฟรมให้ player ใหม่เกิดก่อน)
+	# ปิดอมตะ
 	await get_tree().process_frame
 	var p2 := get_tree().get_first_node_in_group("player")
 	if p2:
 		p2.set("invincible", false)
 
-	# แล้วค่อยจางขาว
+	# Fade in
 	await fade_in_from_white_async()
 
-func _show_upgrade_on_white() -> void:
-	if upgrade_panel_scene == null:
+# ------------------------------------------------------------------
+# ✅ UPDATE: เลือกใช้ Scene ตาม is_endless
+# ------------------------------------------------------------------
+func _show_upgrade_on_white(is_endless: bool) -> void:
+	var target_scene = upgrade_panel_scene # ค่า Default
+	
+	if is_endless:
+		target_scene = upgrade_panel_endless_scene # ถ้าเป็น Endless ใช้ตัวนี้
+
+	if target_scene == null:
 		return
 
-	var up = upgrade_panel_scene.instantiate()
-	add_child(up)  # ✅ อยู่ใน Transition layer สูงกว่า overlay แน่นอน
+	var up = target_scene.instantiate()
+	add_child(up)
 	up.process_mode = Node.PROCESS_MODE_ALWAYS
 
-	# ถ้า up เป็น CanvasLayer ให้ดัน layer ให้สูงกว่า Transition นิดนึง
 	if up is CanvasLayer:
 		up.layer = layer + 1
 
-	# เปิดแบบ "ไม่ให้มันไปยุ่ง pause" เพราะ Transition จะ pause เอง
 	if up.has_method("open"):
 		up.open(false)
 
-	# รอจนกดเลือก
 	if up.has_signal("picked"):
 		await up.picked
 
@@ -203,8 +210,53 @@ func _make_temp_camera_on_player() -> Camera2D:
 	cam.zoom = Vector2.ONE
 	get_tree().current_scene.add_child(cam)
 	cam.make_current()
-
-	# กันโดนกล้องอื่นแย่ง current
 	await get_tree().process_frame
 	cam.make_current()
 	return cam
+
+func screen_shake(amount := 8.0, duration := 0.2):
+	var cam := get_viewport().get_camera_2d()
+	if not cam:
+		return
+	var tween := create_tween()
+	tween.tween_property(cam, "offset", Vector2(randf()*amount, randf()*amount), duration/2)
+	tween.tween_property(cam, "offset", Vector2.ZERO, duration/2)
+
+# ========================================================
+# ✅ NEW FUNCTION: change_scene
+# ฟังก์ชันเปลี่ยนฉากแบบปกติ (สำหรับ Loop เล่นเกม)
+# ========================================================
+func change_scene(target_path: String) -> void:
+	# 1. เช็คว่ามี AnimationPlayer จริงไหม?
+	var anim = get_node_or_null("AnimationPlayer")
+	
+	if anim and anim.has_animation("fade_out"):
+		anim.play("fade_out")
+		await anim.animation_finished
+		get_tree().change_scene_to_file(target_path)
+		if anim.has_animation("fade_in"):
+			anim.play("fade_in")
+			
+	else:
+		# --- กรณีไม่มี AnimationPlayer ใช้ระบบ Overlay ที่มีอยู่แล้ว ---
+		_overlay.color = Color.BLACK
+		_overlay.visible = true
+		_overlay.modulate.a = 0.0
+		
+		var tween = create_tween()
+		tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		
+		# Fade Out
+		tween.tween_property(_overlay, "modulate:a", 1.0, 0.5)
+		await tween.finished
+		
+		# เปลี่ยนฉาก
+		get_tree().change_scene_to_file(target_path)
+		
+		# Fade In
+		tween = create_tween()
+		tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tween.tween_property(_overlay, "modulate:a", 0.0, 0.5)
+		await tween.finished
+		
+		_overlay.visible = false

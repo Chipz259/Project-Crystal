@@ -7,7 +7,7 @@
 size = Vector2(130, 20)
 
 [node name="arrow" type="Area2D"]
-collision_layer = 2
+collision_layer = 8
 script = ExtResource("1_q8ifc")
 speed = 200.0
 

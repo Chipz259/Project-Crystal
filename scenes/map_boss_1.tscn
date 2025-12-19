@@ -1,0 +1,35 @@
+[gd_scene load_steps=6 format=3 uid="uid://bhy67bykpts1t"]
+
+[ext_resource type="PackedScene" uid="uid://dmlxdue07l5hy" path="res://scenes/player.tscn" id="2_i645x"]
+[ext_resource type="PackedScene" uid="uid://pdo4xujgur46" path="res://scenes/player_health_bar.tscn" id="3_rxgra"]
+[ext_resource type="PackedScene" uid="uid://dnxf0grmxjw8a" path="res://scenes/boss_1.tscn" id="4_i645x"]
+[ext_resource type="Texture2D" uid="uid://dljg6157gts4i" path="res://assets/art/bg_1.png" id="4_rxgra"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_uyfrf"]
+
+[node name="map_boss_1" type="Node2D"]
+light_mask = 3
+visibility_layer = 3
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(1000, 552)
+scale = Vector2(0.73703706, 0.73703706)
+texture = ExtResource("4_rxgra")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+position = Vector2(985, 903)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(-7, 44)
+shape = SubResource("WorldBoundaryShape2D_uyfrf")
+
+[node name="player" parent="." instance=ExtResource("2_i645x")]
+position = Vector2(223, 841)
+
+[node name="player_health_bar" parent="." instance=ExtResource("3_rxgra")]
+
+[node name="Boss1" parent="." instance=ExtResource("4_i645x")]
+position = Vector2(1526, 968)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(960, 540)

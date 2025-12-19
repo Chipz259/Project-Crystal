@@ -1,0 +1,33 @@
+[gd_scene load_steps=6 format=3 uid="uid://cb7e7y2ukbwcd"]
+
+[ext_resource type="Texture2D" uid="uid://dljg6157gts4i" path="res://assets/art/bg_1.png" id="1_5ey7h"]
+[ext_resource type="PackedScene" uid="uid://dmlxdue07l5hy" path="res://scenes/player.tscn" id="2_y2hr8"]
+[ext_resource type="PackedScene" uid="uid://pdo4xujgur46" path="res://scenes/player_health_bar.tscn" id="3_fo3p5"]
+[ext_resource type="PackedScene" uid="uid://cakogb4bryuix" path="res://scenes/boss_2.tscn" id="4_ccyk0"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_lxgkc"]
+
+[node name="map_boss_2" type="Node2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(1000, 552)
+scale = Vector2(0.73703706, 0.73703706)
+texture = ExtResource("1_5ey7h")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+position = Vector2(985, 903)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(-7, 44)
+shape = SubResource("WorldBoundaryShape2D_lxgkc")
+
+[node name="player" parent="." instance=ExtResource("2_y2hr8")]
+position = Vector2(223, 841)
+
+[node name="player_health_bar" parent="." instance=ExtResource("3_fo3p5")]
+
+[node name="Boss2" parent="." instance=ExtResource("4_ccyk0")]
+position = Vector2(1736, 814)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(960, 540)

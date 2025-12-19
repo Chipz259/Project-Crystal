@@ -3,17 +3,17 @@ extends CanvasLayer
 @onready var hp_bar = $healthbar_player
 @onready var shard_label: Label = $ShardLabel
 @onready var core_label: Label = $CoreLabel
+@onready var level_label: Label = $LevelLabel
 
 @onready var e1: TextureRect = $EnergyUI/Energy1
 @onready var e2: TextureRect = $EnergyUI/Energy2
 @onready var e3: TextureRect = $EnergyUI/Energy3
 
 @onready var low_hp_vignette: ColorRect = $LowHPVignette
-@export var low_hp_threshold := 0.35   # ต่ำกว่า 35% เริ่มขึ้น
-@export var low_hp_max_alpha := 0.55   # ความเข้มสุด
-@export var low_hp_pulse_speed := 5.0  # ความถี่ pulse
+@export var low_hp_threshold := 0.35
+@export var low_hp_max_alpha := 0.55
+@export var low_hp_pulse_speed := 5.0
 
-# ใส่ texture เม็ดว่าง/เม็ดเต็มจาก sprite sheet
 @export var energy_empty: Texture2D
 @export var energy_fill: Texture2D
 
@@ -26,8 +26,9 @@ var _last_hp := -999999
 
 func _ready() -> void:
 	print("HUD READY")
-	print("low_hp_vignette =", low_hp_vignette)
+	# พยายามหา player ครั้งแรก
 	player = get_tree().get_first_node_in_group("player")
+	
 	_sync_max_hp()
 	
 	shard_label.text = str(GameState.run_shards)
@@ -37,19 +38,31 @@ func _ready() -> void:
 	core_label.text = str(GameState.cores)
 	if not GameState.cores_changed.is_connected(_on_cores_changed):
 		GameState.cores_changed.connect(_on_cores_changed)
+	
+	# เรียก update แต่ถ้า player ยังไม่มี มันจะ return ออกไปเอง (เพราะเราแก้ข้างล่างแล้ว)
 	_update_all(true)
 
 func _on_shards_changed(value: int) -> void:
 	shard_label.text = str(value)
 
 func _process(_delta: float) -> void:
+	# --- ส่วนป้องกัน Error (Safety Check) ---
 	if player == null:
+		# พยายามหาใหม่ทุกเฟรมจนกว่าจะเจอ
 		player = get_tree().get_first_node_in_group("player")
+		
+		# ถ้าเจอแล้ว ให้ตั้งค่าเริ่มต้นทันที
 		if player:
 			_sync_max_hp()
 			_update_all(true)
+		
+		# ถ้ายังไม่เจอ ก็จบการทำงานเฟรมนี้ไปก่อน อย่าเพิ่งรันต่อ
 		return
+	# ------------------------------------
+	
 	_update_all(false)
+	if level_label:
+		level_label.text = "Cavern : " + str(GameManager.current_level)
 
 func _sync_max_hp() -> void:
 	if player == null:
@@ -59,6 +72,10 @@ func _sync_max_hp() -> void:
 		hp_bar.init_health(int(max_hp))
 
 func _update_all(force: bool) -> void:
+	# ✅✅ [แก้ตรงนี้] เพิ่มบรรทัดนี้เพื่อป้องกัน Crash !! ✅✅
+	if player == null:
+		return
+
 	# ---- HP ----
 	var hp = player.get("hp")
 	if hp != null:
@@ -82,13 +99,11 @@ func _update_all(force: bool) -> void:
 func _set_energy_ui(count: int) -> void:
 	var nodes := [e3, e2, e1]
 
-	# ถ้า energy เพิ่มขึ้น: pop เฉพาะเม็ดที่เพิ่งติด
 	if _last_energy >= 0 and count > _last_energy:
 		var idx := count - 1
 		if idx >= 0 and idx < 3:
 			_pop(nodes[idx])
 
-	# ถ้า energy ลดลงเป็น 0 (ยิงหมด): ทำให้ทุกเม็ดหดนิด ๆ
 	if _last_energy > 0 and count == 0:
 		for n in nodes:
 			if n:
@@ -96,7 +111,6 @@ func _set_energy_ui(count: int) -> void:
 				t.tween_property(n, "scale", Vector2(0.85, 0.85), 0.05)
 				t.tween_property(n, "scale", Vector2.ONE, 0.08)
 
-	# อัปเดต texture/visibility ตามเดิม
 	for i in range(3):
 		if nodes[i] == null:
 			continue
@@ -107,10 +121,6 @@ func _set_energy_ui(count: int) -> void:
 			nodes[i].texture = energy_fill if i < count else energy_empty
 			nodes[i].visible = true
 
-
-	# effect เล็ก ๆ ตอนเพิ่ม energy (optional)
-	# ถ้าอยากให้ปิ๊ง ๆ บอก เดี๋ยวใส่ tween ให้
-	
 func _pop(node: CanvasItem) -> void:
 	if node == null:
 		return
@@ -140,10 +150,7 @@ func _update_low_hp_vignette() -> void:
 		low_hp_vignette.modulate.a = 0.0
 		return
 
-	# ยิ่งเลือดต่ำ ยิ่งเข้ม
 	var t: float = clamp((low_hp_threshold - ratio) / low_hp_threshold, 0.0, 1.0)
-
-	# pulse เบา ๆ
 	var pulse := (sin(Time.get_ticks_msec() / 1000.0 * low_hp_pulse_speed) * 0.5 + 0.5)
 	var alpha: float = low_hp_max_alpha * t * (0.75 + 0.25 * pulse)
 

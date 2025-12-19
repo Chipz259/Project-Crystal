@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cpykr0eqqx0dx"]
 
 [ext_resource type="Script" uid="uid://bqin3jonfqjjv" path="res://script/UpgradePanel.gd" id="1_pxrjq"]
-[ext_resource type="Texture2D" uid="uid://biel8lk1qcu0h" path="res://assets/tft.png" id="2_51cro"]
+[ext_resource type="Texture2D" uid="uid://biel8lk1qcu0h" path="res://assets/ui_use/tft.png" id="2_51cro"]
 
 [node name="UpgradePanel" type="CanvasLayer"]
 layer = 10

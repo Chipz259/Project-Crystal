@@ -1,0 +1,47 @@
+[gd_scene load_steps=8 format=3 uid="uid://ns4d6txf2vv5"]
+
+[ext_resource type="Texture2D" uid="uid://dfw8f1yu8vu35" path="res://assets/all_caves/y1cVuL.png" id="1_0s3ec"]
+[ext_resource type="Script" uid="uid://jvm0pne7cetf" path="res://script/LevelRoom.gd" id="1_w2vc8"]
+[ext_resource type="PackedScene" uid="uid://pdo4xujgur46" path="res://scenes/player_health_bar.tscn" id="2_w2vc8"]
+[ext_resource type="PackedScene" uid="uid://yb5602sw7w5q" path="res://scenes/UpgradePanelEndless.tscn" id="2_ya236"]
+[ext_resource type="PackedScene" uid="uid://dnxf0grmxjw8a" path="res://scenes/boss_1.tscn" id="3_0s3ec"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_7l5y1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ovg8f"]
+size = Vector2(289, 341.5)
+
+[node name="MapMiniBoss" type="Node2D"]
+script = ExtResource("1_w2vc8")
+is_final_boss = true
+upgrade_panel_scene = ExtResource("2_ya236")
+
+[node name="Origbig" type="Sprite2D" parent="."]
+position = Vector2(958, 533)
+scale = Vector2(0.44679803, 0.44679803)
+texture = ExtResource("1_0s3ec")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+position = Vector2(985, 903)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(-7, 44)
+shape = SubResource("WorldBoundaryShape2D_7l5y1")
+
+[node name="EntryPoint" type="Marker2D" parent="."]
+position = Vector2(72, 870)
+
+[node name="ExitZone" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ExitZone"]
+position = Vector2(1784, 813.75)
+shape = SubResource("RectangleShape2D_ovg8f")
+
+[node name="Enemies" type="Node2D" parent="."]
+
+[node name="Boss1" parent="Enemies" instance=ExtResource("3_0s3ec")]
+position = Vector2(1499, 995)
+
+[node name="player_health_bar" parent="." instance=ExtResource("2_w2vc8")]
+
+[connection signal="body_entered" from="ExitZone" to="." method="_on_exit_entered"]

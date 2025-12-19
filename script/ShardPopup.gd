@@ -1,17 +1,24 @@
-# ShardPopup.gd
 extends Node2D
 
-@export var fade_time := 0.35  # ปรับให้ช้าหรือเร็วได้
-@onready var sprite: Sprite2D = $Sprite2D
+@onready var label = $Label
 
-func _ready() -> void:
-	if sprite == null:
-		queue_free()
-		return
+# ตัวแปรเก็บยอดเงิน (ตั้งค่าเริ่มต้นเป็น 0)
+var amount: int = 0
 
-	# เริ่มจากทึบเต็ม
-	sprite.modulate.a = 1.0
+func _ready():
+	# 1. พอเกิดมาปุ๊บ ให้แก้ข้อความทันที
+	if label:
+		label.text = "+" + str(amount)
+	
+	# 2. เล่นอนิเมชั่นลอยขึ้น + จางหาย
+	var tween = create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(self, "position:y", position.y - 50, 0.8).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "modulate:a", 0.0, 0.8).set_ease(Tween.EASE_IN)
+	
+	await tween.finished
+	queue_free()
 
-	var t := create_tween()
-	t.tween_property(sprite, "modulate:a", 0.0, fade_time)
-	t.finished.connect(queue_free)
+# ฟังก์ชันนี้แค่รับค่ามาเก็บไว้ก่อน (ยังไม่แก้ Text ตรงนี้)
+func setup(val: int):
+	amount = val

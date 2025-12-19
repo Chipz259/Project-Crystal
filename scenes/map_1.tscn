@@ -2,13 +2,14 @@
 
 [ext_resource type="PackedScene" uid="uid://dmlxdue07l5hy" path="res://scenes/player.tscn" id="1_ibhou"]
 [ext_resource type="Script" uid="uid://28mq4v83qf6k" path="res://script/map_1.gd" id="1_lj2ar"]
-[ext_resource type="Texture2D" uid="uid://o1cii2hjm3nm" path="res://assets/origbig.png" id="2_0dnla"]
+[ext_resource type="Texture2D" uid="uid://o1cii2hjm3nm" path="res://assets/for_test/origbig.png" id="2_0dnla"]
 [ext_resource type="PackedScene" uid="uid://cgd0ksnrtlb2y" path="res://scenes/enemy.tscn" id="2_3okoh"]
 [ext_resource type="PackedScene" uid="uid://pdo4xujgur46" path="res://scenes/player_health_bar.tscn" id="4_00lji"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_ibqsa"]
 
 [node name="map_1" type="Node2D"]
+light_mask = 3
 script = ExtResource("1_lj2ar")
 
 [node name="Origbig" type="Sprite2D" parent="."]

@@ -1,0 +1,47 @@
+[gd_scene load_steps=7 format=3 uid="uid://cqe2wetdyswdv"]
+
+[ext_resource type="Script" uid="uid://jvm0pne7cetf" path="res://script/LevelRoom.gd" id="1_aq312"]
+[ext_resource type="Texture2D" uid="uid://dah8pysvr0ljc" path="res://assets/all_caves/eyVjcs.png" id="1_cq0gc"]
+[ext_resource type="PackedScene" uid="uid://pdo4xujgur46" path="res://scenes/player_health_bar.tscn" id="2_aq312"]
+[ext_resource type="PackedScene" uid="uid://cgd0ksnrtlb2y" path="res://scenes/enemy.tscn" id="3_yx8o1"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_7l5y1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ovg8f"]
+size = Vector2(289, 341.5)
+
+[node name="Room_03" type="Node2D"]
+script = ExtResource("1_aq312")
+
+[node name="Origbig" type="Sprite2D" parent="."]
+position = Vector2(1353, 314)
+scale = Vector2(1.4201925, 1.4201925)
+texture = ExtResource("1_cq0gc")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+position = Vector2(985, 903)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(-7, 44)
+shape = SubResource("WorldBoundaryShape2D_7l5y1")
+
+[node name="EntryPoint" type="Marker2D" parent="."]
+position = Vector2(72, 870)
+
+[node name="ExitZone" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ExitZone"]
+position = Vector2(1784, 813.75)
+shape = SubResource("RectangleShape2D_ovg8f")
+
+[node name="Enemies" type="Node2D" parent="."]
+
+[node name="enemy" parent="Enemies" instance=ExtResource("3_yx8o1")]
+position = Vector2(630, 944)
+
+[node name="enemy2" parent="Enemies" instance=ExtResource("3_yx8o1")]
+position = Vector2(1448, 950)
+
+[node name="player_health_bar" parent="." instance=ExtResource("2_aq312")]
+
+[connection signal="body_entered" from="ExitZone" to="." method="_on_exit_entered"]

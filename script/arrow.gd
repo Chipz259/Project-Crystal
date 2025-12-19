@@ -1,27 +1,38 @@
+# arrow.gd
 extends Area2D
 
-@export var speed := 150.0
+@export var speed := 700.0
+@export var lifetime := 5.0
+
 var target: Node2D
+var shooter: Node = null
+var direction := Vector2.ZERO
 
-
-func _physics_process(delta):
+func _ready() -> void:
 	if target == null:
+		queue_free()
 		return
 
-	var dir := (target.global_position - global_position)
-	if dir.length() == 0:
-		return
+	# ล็อกทิศตั้งแต่ยิง (ไม่ homing ระหว่างทาง)
+	direction = (target.global_position - global_position).normalized()
 
-	dir = dir.normalized()
-	# ใช้ dir ตรง ๆ เลย ไม่ต้อง lerp
-	global_position += dir * speed * delta
+func _physics_process(delta: float) -> void:
+	global_position += direction * speed * delta
 
-func _on_body_entered(body):
-	print("arrow hit:", body)
-	if body.is_in_group("player"):
-		body.on_projectile_hit(self)
-	if is_inside_tree():
+	lifetime -= delta
+	if lifetime <= 0.0:
 		queue_free()
 
-func _ready():
-	print("Arrow spawned, initial target =", target)
+func _on_body_entered(body: Node) -> void:
+	# กันชนบอสเอง
+	if body == shooter:
+		return
+
+	# โดนผู้เล่น
+	if body.is_in_group("player"):
+		body.on_projectile_hit(self)
+		queue_free()
+		return
+
+	# ชนอะไรก็ตามที่ไม่ใช่ผู้เล่น → หาย
+	queue_free()

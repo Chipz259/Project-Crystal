@@ -1,0 +1,62 @@
+[gd_scene load_steps=11 format=3 uid="uid://oy0oix8oui0d"]
+
+[ext_resource type="Script" uid="uid://bdvaldrgnjg6s" path="res://script/shop_endless.gd" id="1_ope3i"]
+[ext_resource type="Script" uid="uid://c01ccsn0dt41h" path="res://script/ShopZoneEndless.gd" id="2_vwmg2"]
+[ext_resource type="Texture2D" uid="uid://o1cii2hjm3nm" path="res://assets/for_test/origbig.png" id="3_tm528"]
+[ext_resource type="Texture2D" uid="uid://by2cbs23egn0c" path="res://assets/Gemini_Generated_Image_6u5ea16u5ea16u5e.png" id="5_63ce4"]
+[ext_resource type="Script" uid="uid://cxfpwcy5ang6d" path="res://script/ShopPanelEndless.gd" id="7_upbj7"]
+[ext_resource type="PackedScene" uid="uid://pdo4xujgur46" path="res://scenes/player_health_bar.tscn" id="8_2siay"]
+[ext_resource type="PackedScene" uid="uid://fqthdmg6vku3" path="res://scenes/shop_panel.tscn" id="10_rosiv"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_t2xha"]
+blend_mode = 2
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_slfnn"]
+size = Vector2(359, 337.5)
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_33fdb"]
+
+[node name="ShopEndless" type="Node2D"]
+script = ExtResource("1_ope3i")
+
+[node name="Origbig" type="Sprite2D" parent="."]
+material = SubResource("CanvasItemMaterial_t2xha")
+position = Vector2(940.99994, 524)
+scale = Vector2(0.89853394, 0.89853394)
+texture = ExtResource("3_tm528")
+
+[node name="Shop" type="Area2D" parent="."]
+collision_mask = 3
+script = ExtResource("2_vwmg2")
+shop_panel_path = NodePath("../ShopPanel")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Shop"]
+position = Vector2(1130, 708)
+shape = SubResource("RectangleShape2D_slfnn")
+
+[node name="Sprite2D" type="Sprite2D" parent="Shop"]
+position = Vector2(1117, 669.68756)
+scale = Vector2(0.5042188, 0.5042188)
+texture = ExtResource("5_63ce4")
+
+[node name="Label" type="Label" parent="Shop"]
+offset_left = 821.0
+offset_top = 716.0
+offset_right = 977.0
+offset_bottom = 750.0
+theme_override_font_sizes/font_size = 24
+text = "[E] to interact"
+metadata/_edit_use_anchors_ = true
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+position = Vector2(935, 879)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+shape = SubResource("WorldBoundaryShape2D_33fdb")
+
+[node name="player_health_bar" parent="." instance=ExtResource("8_2siay")]
+
+[node name="ShopPanel" parent="." instance=ExtResource("10_rosiv")]
+script = ExtResource("7_upbj7")
+
+[connection signal="body_entered" from="Shop" to="Shop" method="_on_body_entered"]

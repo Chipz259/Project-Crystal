@@ -1,0 +1,7 @@
+[gd_resource type="AtlasTexture" load_steps=2 format=3 uid="uid://c3al7rkptv381"]
+
+[ext_resource type="Texture2D" uid="uid://c3j4swu2d1epj" path="res://assets/Mecha-stone Golem 0.1/weapon PNG/Laset_Green_sheet.png" id="1_1umw3"]
+
+[resource]
+atlas = ExtResource("1_1umw3")
+region = Rect2(43, 223, 20, 20)
