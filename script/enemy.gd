@@ -22,7 +22,7 @@ extends CharacterBody2D
 @export var dmg_hit1: int = 1
 @export var dmg_hit2: int = 2
 # จังหวะเวลา (สำคัญมาก! ต้องจูนให้ตรงกับอนิเมชัน)
-@export var time_windup1: float = 0.3   # เวลาง้างท่า 1
+@export var time_windup1: float = 0.6   # เวลาง้างท่า 1
 @export var time_active1: float = 0.2   # เวลาเปิด Hitbox ท่า 1
 @export var time_between: float = 0.3   # เวลาพักระหว่างท่า 1 กับ 2
 @export var time_active2: float = 0.2   # เวลาเปิด Hitbox ท่า 2
@@ -90,7 +90,7 @@ func _physics_process(delta: float) -> void:
 		State.CHASE:
 			if not player: state = State.IDLE; return
 			var dist = global_position.distance_to(player.global_position)
-
+ 
 			if dist <= attack_range and can_attack:
 				_start_combo_attack() # เรียกฟังก์ชันคอมโบใหม่
 			elif dist > detect_range * 1.5:
@@ -117,7 +117,7 @@ func _start_combo_attack() -> void:
 	# --- จังหวะที่ 1 ---
 	await get_tree().create_timer(time_windup1).timeout
 	if state != State.ATTACK: return # เช็คเผื่อโดนขัดจังหวะ
-
+	
 	print("Hit 1 Active!")
 	current_hit_damage = dmg_hit1
 	shape1.set_deferred("disabled", false) # เปิด Shape 1
