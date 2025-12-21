@@ -4,7 +4,7 @@ const MAX_ENERGY := 3
 @export var block_cooldown := 0.6   # คูลดาวน์หลังบล็อก (ปรับได้)
 var block_cd_timer := 0.0
 
-@export var energy_damage_by_stack := [100, 300, 600] 
+@export var energy_damage_by_stack := [1, 3, 6] 
 # มี 1 energy = 1 dmg, มี 2 = 3 dmg, มี 3 = 6 dmg (ปรับเลขได้ตามใจ)
 
 @export var perfect_block_window := 0.35  # เวลาบล็อกพอดีตอนกระสุนชน
@@ -18,19 +18,19 @@ var _parry_consumed := false
 
 @export var base_heal_amount := 1
 
-var max_hp := 5
+var max_hp := 6
 var hp := max_hp
 var invincible := false
 
 var spawn_pos := Vector2.ZERO
-var energy := 1
+var energy := 0
 
 var blocking := false
 var block_timer := 0.0
 var _hitstop_lock := false
 
 const SPEED = 300.0
-const JUMP_VELOCITY = -400.0
+const JUMP_VELOCITY = -575.0
 
 @export var dash_speed := 1350.0
 @export var dash_duration := 0.35
@@ -126,10 +126,8 @@ func update_anim_fsm() -> void:
 func play_anim_for_state(state: AnimState) -> void:
 	match state:
 		AnimState.IDLE:
-			print("idle")
 			anim.play("idle")
 		AnimState.RUN:
-			print("run")
 			anim.play("run")
 		AnimState.JUMP:
 			anim.play("jump")
@@ -218,8 +216,6 @@ func _process(delta):
 
 	# --- ยิง energy ตามเดิม ---
 	if Input.is_action_just_pressed("shoot_energy") and energy > 0:
-		sfx_attack.stop()
-		sfx_attack.play()
 		print("SHOOT ENERGY, stack =", energy)
 		shoot_energy()
 		energy = 0
@@ -321,7 +317,11 @@ func die() -> void:
 		GameState.cores_changed.emit(GameState.cores) # 👈 ใส่ตรงนี้
 		respawn()
 	else:
-		get_tree().quit()
+		Engine.time_scale = 1.0 
+		get_tree().paused = false
+		GameState.reset_run() 
+		GameState.reset_player_state()
+		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
 func respawn() -> void:
 	hp = max_hp

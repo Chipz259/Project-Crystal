@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
-@export var max_hp := 40
-var hp := 0
+@export var max_hp := 20
+var hp := 20
 
 @export var gravity := 1600.0
 
@@ -166,7 +166,7 @@ func _enter_shoot3() -> void:
 
 	for i in range(3):
 		_fire_one_shot()
-		await get_tree().create_timer(0.28, true, false, true).timeout
+		await get_tree().create_timer(0.15, true, false, true).timeout
 		if state != State.SHOOT3:
 			_busy = false
 			return
@@ -461,3 +461,15 @@ func drop_loot():
 		if popup.has_method("setup"):
 			popup.setup(total_received)
 		get_tree().current_scene.add_child(popup)
+
+func buff_stats(multiplier: float):
+	# เพิ่มเลือดตามตัวคูณ
+	max_hp = int(max_hp * multiplier)
+	hp = max_hp
+	
+	if healthbar and healthbar.has_method("init_health"):
+		healthbar.init_health(max_hp)
+	# ถ้ามีตัวแปร damage ก็คูณ damage ด้วยได้
+	# damage = int(damage * multiplier)
+	
+	print(name, " Buffed! HP is now: ", max_hp)

@@ -1,17 +1,18 @@
-[gd_scene load_steps=13 format=3 uid="uid://pdo4xujgur46"]
+[gd_scene load_steps=15 format=3 uid="uid://pdo4xujgur46"]
 
-[ext_resource type="Texture2D" uid="uid://cpg2ofrymx7v4" path="res://assets/ui_use/hp_bar_empty.tres" id="1_oil0j"]
 [ext_resource type="Script" uid="uid://cu8vm8lg2gx35" path="res://script/player_health_bar.gd" id="1_ujpt8"]
 [ext_resource type="Script" uid="uid://d0nm1wi2012in" path="res://script/healthbar.gd" id="2_ujpt8"]
 [ext_resource type="Texture2D" uid="uid://cm0g7he5xgbpr" path="res://assets/ui_use/energy_fill.tres" id="3_orymg"]
 [ext_resource type="Texture2D" uid="uid://bhhcnsund4pfp" path="res://assets/ui_use/energy_empty.tres" id="4_temqn"]
-[ext_resource type="Texture2D" uid="uid://4q335xxs2p" path="res://icon.svg" id="6_576rc"]
+[ext_resource type="Texture2D" uid="uid://b8yakr731xf8i" path="res://assets/new_hp.tres" id="5_04gef"]
+[ext_resource type="Texture2D" uid="uid://dd208wrq0mynb" path="res://assets/shard.png" id="6_04gef"]
+[ext_resource type="Texture2D" uid="uid://nbb4fvvyust5" path="res://assets/gemCore_Glow_128.png" id="7_38th7"]
 [ext_resource type="FontFile" uid="uid://cv68qxorq062s" path="res://assets/SuperMario256.ttf" id="7_jl8gu"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ujpt8"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oil0j"]
-bg_color = Color(0.8117647, 0.34117648, 0.23529412, 1)
+bg_color = Color(0.37849203, 0.5947152, 0.89533806, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ujpt8"]
 bg_color = Color(0.03529412, 0.047058824, 0.078431375, 1)
@@ -21,17 +22,55 @@ bg_color = Color(1, 1, 1, 1)
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_ujpt8"]
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_04gef"]
+
 [node name="player_health_bar" type="CanvasLayer"]
 script = ExtResource("1_ujpt8")
 energy_empty = ExtResource("4_temqn")
 energy_fill = ExtResource("3_orymg")
 
+[node name="EnergyUI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 746.0
+offset_top = -29.0
+offset_right = 1082.0
+offset_bottom = 156.0
+
+[node name="Energy1" type="TextureRect" parent="EnergyUI"]
+layout_mode = 0
+offset_left = 127.0
+offset_top = 964.0
+offset_right = 250.0
+offset_bottom = 1064.0
+texture = ExtResource("4_temqn")
+stretch_mode = 5
+
+[node name="Energy2" type="TextureRect" parent="EnergyUI"]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 965.0
+offset_right = 141.0
+offset_bottom = 1065.0
+texture = ExtResource("4_temqn")
+stretch_mode = 5
+
+[node name="Energy3" type="TextureRect" parent="EnergyUI"]
+z_index = 2
+layout_mode = 0
+offset_left = -89.00003
+offset_top = 964.0
+offset_right = 33.99997
+offset_bottom = 1064.0
+texture = ExtResource("4_temqn")
+stretch_mode = 5
+
 [node name="healthbar_player" type="ProgressBar" parent="."]
 z_index = 1
-offset_left = 132.0
-offset_top = 56.0
-offset_right = 275.0
-offset_bottom = 91.0
+offset_left = 1105.0
+offset_top = 968.0
+offset_right = 1248.0
+offset_bottom = 1003.0
 theme_override_styles/background = SubResource("StyleBoxEmpty_ujpt8")
 theme_override_styles/fill = SubResource("StyleBoxFlat_oil0j")
 value = 50.0
@@ -63,88 +102,63 @@ offset_bottom = 40.0
 texture = SubResource("CanvasTexture_ujpt8")
 
 [node name="HpBarEmpty" type="Sprite2D" parent="healthbar_player"]
+material = SubResource("CanvasItemMaterial_04gef")
 position = Vector2(26, 13)
 scale = Vector2(5.690789, 5.690789)
-texture = ExtResource("1_oil0j")
-
-[node name="EnergyUI" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 336.0
-offset_bottom = 185.0
-
-[node name="Energy1" type="TextureRect" parent="EnergyUI"]
-layout_mode = 0
-offset_left = 229.0
-offset_top = 113.895
-offset_right = 269.0
-offset_bottom = 153.89502
-texture = ExtResource("4_temqn")
-stretch_mode = 5
-
-[node name="Energy2" type="TextureRect" parent="EnergyUI"]
-layout_mode = 0
-offset_left = 169.0
-offset_top = 113.895
-offset_right = 209.0
-offset_bottom = 153.89502
-texture = ExtResource("4_temqn")
-stretch_mode = 5
-
-[node name="Energy3" type="TextureRect" parent="EnergyUI"]
-layout_mode = 0
-offset_left = 110.0
-offset_top = 113.895
-offset_right = 150.0
-offset_bottom = 153.89502
-texture = ExtResource("4_temqn")
-stretch_mode = 5
+texture = ExtResource("5_04gef")
 
 [node name="LowHPVignette" type="ColorRect" parent="."]
+visible = false
 z_index = 50
-offset_left = -13.0
+offset_left = -4.0
 offset_top = -12.0
-offset_right = 1961.7185
+offset_right = 1970.7185
 offset_bottom = 1104.0
 color = Color(0.5411765, 0.09803922, 0.09803922, 0.7058824)
 
 [node name="ShardLabel" type="Label" parent="."]
 offset_left = 162.0
-offset_top = 171.0
+offset_top = 47.0
 offset_right = 202.0
-offset_bottom = 194.0
+offset_bottom = 70.0
+scale = Vector2(1.8553226, 1.8553226)
+theme_override_fonts/font = ExtResource("7_jl8gu")
+theme_override_font_sizes/font_size = 32
 text = "0"
 
 [node name="Sprite2D" type="Sprite2D" parent="ShardLabel"]
 position = Vector2(-30, 11)
 scale = Vector2(0.34375, 0.34375)
-texture = ExtResource("6_576rc")
+texture = ExtResource("6_04gef")
 
 [node name="CoreLabel" type="Label" parent="."]
-offset_left = 261.0
-offset_top = 172.0
-offset_right = 301.0
-offset_bottom = 195.0
+offset_left = 400.0
+offset_top = 48.0
+offset_right = 440.0
+offset_bottom = 80.0
+scale = Vector2(1.8553226, 1.8553226)
+theme_override_fonts/font = ExtResource("7_jl8gu")
+theme_override_font_sizes/font_size = 32
 text = "0"
 
 [node name="Sprite2D2" type="Sprite2D" parent="CoreLabel"]
 position = Vector2(-27, 10)
-scale = Vector2(0.34375, 0.34375)
-texture = ExtResource("6_576rc")
+scale = Vector2(0.45129228, 0.45129228)
+texture = ExtResource("7_38th7")
 
 [node name="LevelLabel" type="Label" parent="."]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -350.0
-offset_top = 52.0
-offset_right = -99.0
-offset_bottom = 114.0
+offset_left = -322.0
+offset_top = 26.0
+offset_right = -71.0
+offset_bottom = 88.0
 grow_horizontal = 0
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 20
 theme_override_fonts/font = ExtResource("7_jl8gu")
-theme_override_font_sizes/font_size = 61
+theme_override_font_sizes/font_size = 48
 text = "Cavern"
 
 [connection signal="timeout" from="healthbar_player/Timer_player" to="." method="_on_timer_player_timeout"]

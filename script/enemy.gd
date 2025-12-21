@@ -3,8 +3,8 @@ extends CharacterBody2D
 
 # -------------------- CONFIG --------------------
 @export_group("Stats")
-@export var max_hp: int = 10
-@export var hp: int = 10
+@export var max_hp: int = 1
+@export var hp: int = 1
 @onready var health_bar = $healthbar
 @export var move_speed: float = 80.0
 @export var gravity: float = 900.0
@@ -263,9 +263,9 @@ func _get_player() -> Node2D:
 	return nodes[0] if nodes else null
 
 # Debug วาดวงกลม
-func _draw() -> void:
-	draw_circle(Vector2.ZERO, detect_range, Color(0, 1, 0, 0.1))
-	draw_circle(Vector2.ZERO, attack_range, Color(1, 0, 0, 0.1))
+#func _draw() -> void:
+	#draw_circle(Vector2.ZERO, detect_range, Color(0, 1, 0, 0.1))
+	#draw_circle(Vector2.ZERO, attack_range, Color(1, 0, 0, 0.1))
 
 func buff_stats(multiplier: float):
 	# เพิ่มเลือดตามตัวคูณ

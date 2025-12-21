@@ -4,7 +4,7 @@ signal run_shards_changed(value: int)
 signal cores_changed(value: int)
 
 var run_shards: int = 0
-var cores: int = 0
+var cores: int = 1
 
 # ✅ อัปเกรด: ได้ shard เพิ่ม “ต่อครั้งที่ได้ shard”
 var shard_bonus_add: int = 0  # เช่น +1 ต่อ kill
@@ -12,6 +12,9 @@ var parry_window_bonus: float = 0.0 # เพิ่ม parry window bonus
 
 var heal_bonus: int = 0
 var heal_upgrade_taken: bool = false
+
+var atk_up: int = 0
+var atk_upgrade_taken: bool = false
 
 var saved_hp: int = -1
 var saved_energy: int = -1
@@ -51,6 +54,7 @@ func reset_run() -> void:
 	cores_changed.emit(cores)
 	saved_hp = -1
 	saved_energy = -1
+	atk_up = 0
 
 func reset_player_state():
 	current_hp = -1

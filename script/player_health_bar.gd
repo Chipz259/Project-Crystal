@@ -17,7 +17,7 @@ extends CanvasLayer
 @export var energy_empty: Texture2D
 @export var energy_fill: Texture2D
 
-@export var energy_full_pulse_scale := 1.03
+@export var energy_full_pulse_scale := 1.0050
 @export var energy_full_pulse_speed := 6.0
 
 var player: Node = null
@@ -126,7 +126,7 @@ func _pop(node: CanvasItem) -> void:
 		return
 	var t := create_tween()
 	node.scale = Vector2.ONE
-	t.tween_property(node, "scale", Vector2(1.25, 1.25), 0.06)
+	t.tween_property(node, "scale", Vector2(1.50, 1.50), 0.06)
 	t.tween_property(node, "scale", Vector2.ONE, 0.10).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 func _update_low_hp_vignette() -> void:
