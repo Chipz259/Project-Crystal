@@ -76,6 +76,7 @@ text = "Skill 3"
 autowrap_mode = 2
 
 [node name="Close" type="Button" parent="Panel/MarginContainer/VBoxContainer/Label"]
+visible = false
 layout_mode = 0
 offset_left = 920.0
 offset_top = 832.0

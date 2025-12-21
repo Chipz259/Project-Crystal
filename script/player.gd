@@ -4,7 +4,7 @@ const MAX_ENERGY := 3
 @export var block_cooldown := 0.6   # คูลดาวน์หลังบล็อก (ปรับได้)
 var block_cd_timer := 0.0
 
-@export var energy_damage_by_stack := [100, 300, 600] 
+@export var energy_damage_by_stack := [1, 3, 6] 
 # มี 1 energy = 1 dmg, มี 2 = 3 dmg, มี 3 = 6 dmg (ปรับเลขได้ตามใจ)
 
 @export var perfect_block_window := 0.35  # เวลาบล็อกพอดีตอนกระสุนชน
@@ -18,19 +18,19 @@ var _parry_consumed := false
 
 @export var base_heal_amount := 1
 
-var max_hp := 5
+var max_hp := 6
 var hp := max_hp
 var invincible := false
 
 var spawn_pos := Vector2.ZERO
-var energy := 1
+var energy := 0
 
 var blocking := false
 var block_timer := 0.0
 var _hitstop_lock := false
 
 const SPEED = 300.0
-const JUMP_VELOCITY = -400.0
+const JUMP_VELOCITY = -575.0
 
 @export var dash_speed := 1350.0
 @export var dash_duration := 0.35
@@ -45,6 +45,12 @@ var dash_iframe_timer := 0.0
 
 var anim_state : AnimState = AnimState.IDLE
 @onready var anim := $AnimatedSprite2D
+@onready var sfx_parry := $SFX_parry
+@onready var sfx_dash := $SFX_dash
+@onready var sfx_heal := $SFX_healing
+@onready var sfx_hurt := $SFX_hurt
+@onready var sfx_attack := $SFX_attack
+
 
 enum AnimState {
 	IDLE,
@@ -120,10 +126,8 @@ func update_anim_fsm() -> void:
 func play_anim_for_state(state: AnimState) -> void:
 	match state:
 		AnimState.IDLE:
-			print("idle")
 			anim.play("idle")
 		AnimState.RUN:
-			print("run")
 			anim.play("run")
 		AnimState.JUMP:
 			anim.play("jump")
@@ -134,10 +138,14 @@ func play_anim_for_state(state: AnimState) -> void:
 		AnimState.SHOOT:
 			anim.play("shoot")
 		AnimState.HIT:
+			sfx_hurt.stop()
+			sfx_hurt.play()
 			anim.play("hit")
 		AnimState.DEAD:
 			anim.play("dead")
 		AnimState.DASH:
+			sfx_dash.stop()
+			sfx_dash.play()
 			anim.play("dash")
 
 
@@ -146,7 +154,6 @@ func _ready():
 	hp = max_hp
 	spawn_pos = global_position
 	print("Player added to group 'player'", self)
-
 	# ✅ restore state จาก GameState ถ้ามี
 	var saved := GameState.consume_player_state()
 	var sh := int(saved.get("hp", -1))
@@ -219,13 +226,14 @@ func on_projectile_hit(projectile):
 	# 1) parry สำเร็จ
 	if blocking and not _parry_consumed:
 		_parry_consumed = true
-
 		energy = min(energy + 1, MAX_ENERGY)
 		projectile.queue_free()
 
 		flash_parry()
 		if get_tree().current_scene.has_method("screen_shake"):
 			get_tree().current_scene.screen_shake(5.0, 0.09)
+			
+		
 		
 		anim.play("block") # ย้ำว่าเป็นท่า block (หรือท่า parry ถ้ามี)
 		anim.frame = 1     # บังคับให้เป็นเฟรมที่ 1 (เฟรมที่ 2 ของภาพ) ทันที!
@@ -237,6 +245,8 @@ func on_projectile_hit(projectile):
 		block_timer = 0.0
 		block_cd_timer = 0.0
 		print("Parry consumed -> press again for next projectile")
+		sfx_parry.stop()
+		sfx_parry.play()
 		return
 
 	# ✅ invincible: โดนแล้วให้หายไปเฉย ๆ (กันบัคช่วง transition)
@@ -293,7 +303,8 @@ func take_damage(amount: int) -> void:
 	if invincible:
 		print("Damage ignored: invincible")
 		return
-
+	sfx_hurt.stop()
+	sfx_hurt.play()
 	hp -= amount
 	if hp <= 0:
 		die()
@@ -306,7 +317,11 @@ func die() -> void:
 		GameState.cores_changed.emit(GameState.cores) # 👈 ใส่ตรงนี้
 		respawn()
 	else:
-		get_tree().quit()
+		Engine.time_scale = 1.0 
+		get_tree().paused = false
+		GameState.reset_run() 
+		GameState.reset_player_state()
+		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
 func respawn() -> void:
 	hp = max_hp
@@ -419,7 +434,8 @@ func handle_incoming_attack(attack_data: Dictionary) -> void:
 		# --- PARRY SUCCESS (บล็อกทันในเวลา Perfect) ---
 		if not _parry_consumed:
 			_parry_consumed = true
-			
+			sfx_parry.stop()
+			sfx_parry.play()
 			print("!!! MELEE PARRY SUCCESS !!!")
 			
 			# เพิ่ม Energy

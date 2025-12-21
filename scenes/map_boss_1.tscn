@@ -12,24 +12,24 @@ light_mask = 3
 visibility_layer = 3
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(1000, 552)
-scale = Vector2(0.73703706, 0.73703706)
+position = Vector2(1000, 392)
+scale = Vector2(0.8572458, 0.8572458)
 texture = ExtResource("4_rxgra")
 
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
-position = Vector2(985, 903)
+position = Vector2(985, 802)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(-7, 44)
 shape = SubResource("WorldBoundaryShape2D_uyfrf")
 
 [node name="player" parent="." instance=ExtResource("2_i645x")]
-position = Vector2(223, 841)
+position = Vector2(223, 740)
 
 [node name="player_health_bar" parent="." instance=ExtResource("3_rxgra")]
 
-[node name="Boss1" parent="." instance=ExtResource("4_i645x")]
-position = Vector2(1526, 968)
-
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(960, 540)
+
+[node name="Boss1" parent="." instance=ExtResource("4_i645x")]
+position = Vector2(1621, 885)

@@ -40,7 +40,7 @@ shape = SubResource("RectangleShape2D_ovg8f")
 [node name="Enemies" type="Node2D" parent="."]
 
 [node name="Boss1" parent="Enemies" instance=ExtResource("3_0s3ec")]
-position = Vector2(1499, 995)
+position = Vector2(1623, 987)
 
 [node name="player_health_bar" parent="." instance=ExtResource("2_w2vc8")]
 

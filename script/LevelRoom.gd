@@ -1,6 +1,7 @@
 extends Node2D
 
 @onready var enemies_node = $Enemies
+#@onready var boss1_node = $Boss1
 @export var is_final_boss: bool = false
 @export var is_miniboss: bool = false
 @onready var entry_point = $EntryPoint
@@ -79,3 +80,6 @@ func buff_enemies():
 	for enemy in enemies_node.get_children():
 		if enemy.has_method("buff_stats"):
 			enemy.buff_stats(multiplier)
+	#for enemy in boss1_node.get_children():
+		#if enemy.has_method("buff_stats"):
+			#enemy.buff_stats(multiplier)

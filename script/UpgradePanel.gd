@@ -42,6 +42,8 @@ func _pick(i: int) -> void:
 		GameState.parry_window_bonus += 0.05
 	if id == "heal_up":
 		GameState.heal_bonus += 1
+	if id == "atk_up":
+		GameState.atk_up += 1
 
 	picked.emit(id)     # ✅ บอก Transition ว่าเลือกแล้ว
 	close()
@@ -49,10 +51,10 @@ func _pick(i: int) -> void:
 func _roll_options() -> void:
 	# ตอนนี้ให้ “เห็นภาพสุ่ม 3 อัน” แต่มีผลจริงแค่ shard bonus
 	var pool: Array[Dictionary] = [
-		{"id":"shard_bonus", "text":"+1 Shard per kill (TEST)"},
+		{"id":"shard_bonus", "text":"+10 Shard per kill"},
 		{"id":"parry_window", "text":"Parry Window +0.05s"},
 		{"id":"heal_up", "text":"Heal +1 (per heal)"},
-		{"id":"placeholder_b", "text":"(??? ) Energy Cap +?? (Coming soon)"},
+		{"id":"atk_up", "text":"Attack Damage +1"},
 	]
 
 	pool.shuffle()
