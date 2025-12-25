@@ -5,7 +5,7 @@
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_e8xk3"]
 radius = 109.0
-height = 1238.0
+height = 904.0
 
 [node name="FallingRock" type="Area2D"]
 collision_mask = 7
